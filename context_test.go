@@ -89,9 +89,9 @@ func Test_cancelしてみる(t *testing.T) {
 
 }
 
-func Test_cancelの親子関係を確認してみる(t *testing.T){
+func Test_cancelの親子関係を確認してみる(t *testing.T) {
 
-	ctx:= context.Background()
+	ctx := context.Background()
 
 	parent, pCancel := context.WithCancel(ctx)
 	child, cCancel := context.WithCancel(parent)
@@ -106,9 +106,33 @@ func Test_cancelの親子関係を確認してみる(t *testing.T){
 	}()
 
 	select {
-	case <-child.Done(): // 子もキャンセルされる
+	case <-child.Done():
 		t.Log("parent:", parent.Err()) // 親をキャンセルすると
-		t.Log("child:", child.Err()) // 親をキャンセルすると子もキャンセル
+		t.Log("child:", child.Err())   // 親をキャンセルすると子もキャンセル
+	}
+
+}
+
+func Test_cancelの親子関係の子だけキャンセルしてみる(t *testing.T) {
+
+	ctx := context.Background()
+
+	parent, pCancel := context.WithCancel(ctx)
+	child, cCancel := context.WithCancel(parent)
+	defer pCancel()
+
+	go process(ctx)
+
+	go func() {
+		time.Sleep(time.Second)
+		cCancel()
+		t.Log("parent cancelled")
+	}()
+
+	select {
+	case <-child.Done():
+		t.Log("parent:", parent.Err()) // 親はキャンセルされない errorはnil
+		t.Log("child:", child.Err())   // 子はキャンセル
 	}
 
 }
