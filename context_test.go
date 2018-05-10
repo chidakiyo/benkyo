@@ -50,6 +50,9 @@ func Test_contextにstruct入れてみる(t *testing.T) {
 func Test_timeoutを使ってみる(t *testing.T) {
 
 	ctx := context.Background()
+	// --------
+	// WithTimeoutは内部的にWithDeadlineを呼んでいる
+	// --------
 	ctx, cancel := context.WithTimeout(ctx, time.Second) // 1秒後にキャンセル
 	defer func() {
 		t.Log("defer")
@@ -67,4 +70,45 @@ func Test_timeoutを使ってみる(t *testing.T) {
 // 重い処理
 func process(ctx context.Context) {
 	time.Sleep(5 * time.Second)
+}
+
+func Test_cancelしてみる(t *testing.T) {
+
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+
+	go process(ctx)
+
+	time.Sleep(1 * time.Second)
+	cancel() // 1秒経ったらキャンセル
+
+	select {
+	case <-ctx.Done():
+		t.Log("done:", ctx.Err())
+	}
+
+}
+
+func Test_cancelの親子関係を確認してみる(t *testing.T){
+
+	ctx:= context.Background()
+
+	parent, pCancel := context.WithCancel(ctx)
+	child, cCancel := context.WithCancel(parent)
+	defer cCancel()
+
+	go process(ctx)
+
+	go func() {
+		time.Sleep(time.Second)
+		pCancel()
+		t.Log("parent cancelled")
+	}()
+
+	select {
+	case <-child.Done(): // 子もキャンセルされる
+		t.Log("parent:", parent.Err()) // 親をキャンセルすると
+		t.Log("child:", child.Err()) // 親をキャンセルすると子もキャンセル
+	}
+
 }
