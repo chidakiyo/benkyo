@@ -1,4 +1,4 @@
-package go_sandbox
+package _go
 
 import (
 	"io"
