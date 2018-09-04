@@ -1,17 +1,15 @@
 service: default
-version: 0-0-1
 runtime: go
 api_version: go1.9
+version: 0-0-1
 
 inbound_services:
 - warmup
 
 handlers:
-
-#faviconを配信する設定
 - url: /favicon\.ico
   static_files: favicon.ico
-  upload: favicon\.ico # app.yamlと同一のディレクトリのファイルはAppengine上にuploadされる。
+  upload: favicon\.ico
 
 - url: /_ah/warmup
   script: _go_app
