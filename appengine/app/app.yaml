@@ -1,7 +1,5 @@
 service: default
-runtime: go
-api_version: go1.9
-version: 0-0-1
+runtime: go111
 
 inbound_services:
 - warmup

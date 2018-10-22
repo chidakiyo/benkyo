@@ -4,4 +4,4 @@ run:
 
 # GAEにデプロイする
 deploy:
-	goapp deploy ./app
+	gcloud app deploy --project ${SANDBOX_PROJECT} --version 0 --quiet ./app/app.yaml

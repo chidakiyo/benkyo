@@ -17,6 +17,7 @@
   name = "google.golang.org/appengine"
   packages = [
     ".",
+    "datastore",
     "delay",
     "internal",
     "internal/app_identity",
@@ -35,6 +36,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "01ef8ae0e7f0f31f66138e591e26bd377bd5ce5f7e100879b69cb0509730e8f6"
+  inputs-digest = "c6153a8c435bc22b1bf27f775fee35eab5fc8a53495cae8ee7828fa6d4d3befd"
   solver-name = "gps-cdcl"
   solver-version = 1
