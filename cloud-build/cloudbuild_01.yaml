@@ -1,0 +1,23 @@
+steps:
+
+# 暗号化したファイルを Cloud Build 上で復号化してファイルとして取得する
+
+## decode key ##
+- name: gcr.io/cloud-builders/gcloud
+  args:
+  - kms
+  - decrypt
+  - --ciphertext-file=base.txt.enc
+  - --plaintext-file=/workspace/base.txt
+  - --location=global
+  - --keyring=benkyo-keychain
+  - --key=benkyo-key
+  id: 'decode'
+
+## cat key ##
+- name: gcr.io/$PROJECT_ID/cat
+  args:
+    - /workspace/base.txt
+  id: 'echo'
+
+

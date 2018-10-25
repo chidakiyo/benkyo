@@ -1,0 +1,13 @@
+steps:
+
+# 暗号化した変数を Cloud Build 上で復号化して環境変数として取得する
+
+## echo env ##
+- name: gcr.io/$PROJECT_ID/env
+  args:
+  secretEnv: ['WORD']
+
+secrets:
+- kmsKeyName: projects/{{PROJECT_ID}}/locations/global/keyRings/benkyo-keychain/cryptoKeys/benkyo-key
+  secretEnv:
+    WORD: "CiQANnq0qOdjCv1xSfIDJiEuR+mhMHDknH0XVc37iWQmgH1IlXsSjQEALx9DRYZExBoaFpX03Zpd9vSyUv+3AylvqONEfBiP9CWRegWQzob6IZx6zLhqM+Y6ooPWpZ6fXHehMbdWR6qoSZBpaCsjNNeMzQHXPi0SSimGtB184IQNdf0f1dRC9R62gess+BKaYPE3LcE8cvLeVhFVHHp/BXM0Au5rh34jv/okmd2MGhySGbcOqhM="
