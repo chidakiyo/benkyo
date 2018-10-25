@@ -34,7 +34,7 @@ dec/text:
 # 変数を直接暗号化して出力する
 SAMPLE_TEXT := "以下、話は、東京中心であるから、そのつもりで、きいていただきたい。"
 enc/inline:
-	echo -n $(SAMPLE_TEXT) | \
+	echo $(SAMPLE_TEXT) | \
 	gcloud --project ${PROJECT_ID} kms encrypt \
 	--plaintext-file=- \
 	--ciphertext-file=- \
@@ -43,7 +43,7 @@ enc/inline:
 	--key=$(KEY_NAME) | base64
 
 # encodeされている変数を直接復号化して出力する（うまくいかない）
-SAMPLE_ENC_TEXT := "CiQANnq0qL3tXKRtAPbBpysbluIbCWUSG31sdDccDhbmzIMnc30SkAEALx9DRaq1sr1tGrmmpzslkXEK0zLL3KaOwJj1dv459Xey2pRcpNGn3ugE8wRGKXmN0kNADZEDnSg2BJqY9LmdG08dY/MCJj4AwSMkyhY24yPnJQ9NCiPWWWXKy+FLxDW3NUyV66BaaMuy5Az1CWEp8tfYYALtvAZwZ9+VuR6W8v9O8nxPTWV7OIe0q1BjBWE="
+SAMPLE_ENC_TEXT := "CiQANnq0qOdjCv1xSfIDJiEuR+mhMHDknH0XVc37iWQmgH1IlXsSjQEALx9DRYZExBoaFpX03Zpd9vSyUv+3AylvqONEfBiP9CWRegWQzob6IZx6zLhqM+Y6ooPWpZ6fXHehMbdWR6qoSZBpaCsjNNeMzQHXPi0SSimGtB184IQNdf0f1dRC9R62gess+BKaYPE3LcE8cvLeVhFVHHp/BXM0Au5rh34jv/okmd2MGhySGbcOqhM="
 dec/inline:
 	echo -n $(SAMPLE_ENC_TEXT) | base64 -D | \
 	gcloud --project ${PROJECT_ID} kms decrypt \

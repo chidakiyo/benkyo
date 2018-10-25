@@ -14,7 +14,7 @@ steps:
   - --key=benkyo-key
   id: 'decode'
 
-## echo key ##
+## cat key ##
 - name: gcr.io/$PROJECT_ID/cat
   args:
     - /workspace/base.txt
