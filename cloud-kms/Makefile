@@ -34,7 +34,7 @@ dec/text:
 # 変数を直接暗号化して出力する
 SAMPLE_TEXT := "以下、話は、東京中心であるから、そのつもりで、きいていただきたい。"
 enc/inline:
-	echo $(SAMPLE_TEXT) | \
+	echo -n $(SAMPLE_TEXT) | \
 	gcloud --project ${PROJECT_ID} kms encrypt \
 	--plaintext-file=- \
 	--ciphertext-file=- \
