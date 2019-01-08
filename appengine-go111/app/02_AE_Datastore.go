@@ -31,3 +31,45 @@ func handleAEDatastore(g *gin.Context) {
 	// response
 	g.String(http.StatusOK, "02_AE_Datastore")
 }
+
+func handleAEDatastoreRead(g *gin.Context) {
+	c := appengine.NewContext(g.Request)
+
+	k := datastore.NewKey(c, "Benkyo", "BK1", 0, nil)
+
+	// 3回Datastoreから取得する
+	{
+		bk := &Benkyo{}
+		err := datastore.Get(c, k, bk)
+		if err != nil {
+			log.Errorf(c, "datastore get error. %s", err)
+			g.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	{
+		bk := &Benkyo{}
+		err := datastore.Get(c, k, bk)
+		if err != nil {
+			log.Errorf(c, "datastore get error. %s", err)
+			g.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	{
+		bk := &Benkyo{}
+		err := datastore.Get(c, k, bk)
+		if err != nil {
+			log.Errorf(c, "datastore get error. %s", err)
+			g.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	log.Infof(c, "datastore get success. %v", k)
+
+	// response
+	g.String(http.StatusOK, "02_AE_Datastore/read")
+}

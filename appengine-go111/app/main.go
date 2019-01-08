@@ -18,6 +18,9 @@ func main() {
 	// AE Datastoreでputする際のtrace
 	route.GET("/02", handleAEDatastore)
 
+	// AE Datastoreでgetする際のtrace
+	route.GET("/02/get", handleAEDatastoreRead)
+
 	// Cloud Datastoreでputする際のtrace
 	route.GET("/03", handleCloudDatastore)
 
