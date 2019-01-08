@@ -30,6 +30,9 @@ func main() {
 	// http getのtraceの確認
 	route.GET("/05", handleHttpGet)
 
+	// delay packageの動作確認
+	route.GET("/06", handleTQDelay)
+
 	appengine.Main() // Listen
 }
 
