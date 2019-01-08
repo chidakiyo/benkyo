@@ -15,6 +15,9 @@ func main() {
 	// ログの出力がリクエストスコープでまとまるか
 	route.GET("/01", handleLog)
 
+	// AE Datastoreでputする際のtrace
+	route.GET("/02", handleAEDatastore)
+
 	appengine.Main() // Listen
 }
 
