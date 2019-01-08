@@ -27,6 +27,9 @@ func main() {
 	// urlfetchのtraceの確認
 	route.GET("/04", handleUrlFetch)
 
+	// http getのtraceの確認
+	route.GET("/05", handleHttpGet)
+
 	appengine.Main() // Listen
 }
 
