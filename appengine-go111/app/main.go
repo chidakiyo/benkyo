@@ -24,6 +24,9 @@ func main() {
 	// Cloud Datastoreでputする際のtrace
 	route.GET("/03", handleCloudDatastore)
 
+	// urlfetchのtraceの確認
+	route.GET("/04", handleUrlFetch)
+
 	appengine.Main() // Listen
 }
 
