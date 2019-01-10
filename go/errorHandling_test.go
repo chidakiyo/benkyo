@@ -1,11 +1,11 @@
 package _go
 
 import (
+	"errors"
 	"io"
+	"log"
 	"os"
 	"testing"
-	"log"
-	"errors"
 )
 
 func Test_Robさんのパターンを試す(t *testing.T) {
@@ -65,8 +65,8 @@ func C(ctx MyContext) error {
 func Test_Robさんのパターンで別々の関数を呼ぶパターンを作ってみる(t *testing.T) {
 
 	baseCtx := MyContext{
-		Name:"ore",
-		Connection:"繋がってる",
+		Name:       "ore",
+		Connection: "繋がってる",
 	}
 
 	// contextAに処理Aを持たせる
@@ -101,9 +101,9 @@ type errExecutor struct {
 }
 
 type MyContext struct {
-	Name string
+	Name       string
 	Connection string // dbコネクションとかのつもり
-	f func(context MyContext) error
+	f          func(context MyContext) error
 }
 
 func (x *errExecutor) Execute(context MyContext) {
@@ -113,11 +113,6 @@ func (x *errExecutor) Execute(context MyContext) {
 	x.err = context.f(context) // ここちょっときもい
 }
 
-func(x *errExecutor) Err() error {
+func (x *errExecutor) Err() error {
 	return x.err
 }
-
-
-
-
-

@@ -1,8 +1,8 @@
 package _go
 
 import (
-	"testing"
 	"github.com/pkg/errors"
+	"testing"
 )
 
 func Test_recoverでエラーログを出す(t *testing.T) {
@@ -19,7 +19,7 @@ func Test_recoverでエラーログを出す(t *testing.T) {
 
 		panic("パニパニパニック！")
 
-	} ()
+	}()
 
 }
 
@@ -37,7 +37,7 @@ func Test_recoverの戻りがinterfaceなのはpanicの引数を受け取るか�
 
 		panic(errors.New("パニパニパニック！")) // panicにerror型で渡すから ↑
 
-	} ()
+	}()
 
 }
 
@@ -57,7 +57,7 @@ func Test_recoverで戻り値を返さない場合に何が返るか_bool(t *tes
 
 		return true
 
-	} ()
+	}()
 
 	t.Log(result) // falseが返る
 }
@@ -78,7 +78,7 @@ func Test_recoverで戻り値を返さない場合に何が返るか_string(t *t
 
 		return "成功！"
 
-	} ()
+	}()
 
 	t.Log(result) // ""が返る
 }
@@ -99,14 +99,14 @@ func Test_recoverで戻り値を返さない場合に何が返るか_int(t *test
 
 		return 1000
 
-	} ()
+	}()
 
 	t.Log(result) // 0が返る
 }
 
 func Test_recoverで戻り値を返す場合(t *testing.T) {
 
-	result := func() (e string)  {
+	result := func() (e string) {
 
 		defer func() {
 			if err := recover(); err != nil {
@@ -121,7 +121,7 @@ func Test_recoverで戻り値を返す場合(t *testing.T) {
 
 		return "成功"
 
-	} ()
+	}()
 
 	t.Log(result) // 失敗 が返る
 }
