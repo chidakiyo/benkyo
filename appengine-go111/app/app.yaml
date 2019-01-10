@@ -1,0 +1,18 @@
+runtime: go111
+
+handlers:
+
+- url: /favicon\.ico
+  static_files: assets/favicon.ico
+  upload: assets/favicon\.ico
+  expiration: "30s"
+
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: auto
+
+env_variables:
+  FOO_VAR: "Bar_Var"
+
