@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
@@ -13,27 +14,14 @@ func handleUrlFetch(g *gin.Context) {
 
 	cl := urlfetch.Client(c)
 
-	// urlfetch x3
-	{
-		_, err := cl.Get("https://chidakiyo.github.io")
-		if err != nil {
-			log.Errorf(c, "fetch error. %s", err)
-			g.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
+	b := Benchmarker{}
 
-	{
-		_, err := cl.Get("https://chidakiyo.github.io")
-		if err != nil {
-			log.Errorf(c, "fetch error. %s", err)
-			g.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
-
-	{
-		_, err := cl.Get("https://chidakiyo.github.io")
+	// 30回実行
+	for i := 0; i <= 30 ; i++ {
+		var err error
+		b.Do(c, func() {
+			_, err = cl.Get("https://chidakiyo.github.io?" + fmt.Sprintf("%d", i))
+		})
 		if err != nil {
 			log.Errorf(c, "fetch error. %s", err)
 			g.String(http.StatusInternalServerError, err.Error())
@@ -42,6 +30,7 @@ func handleUrlFetch(g *gin.Context) {
 	}
 
 	log.Infof(c, "fetch success.")
+	log.Infof(c, "Result : %s", b.Result())
 
 	// response
 	g.String(http.StatusOK, "04_urlfetch")

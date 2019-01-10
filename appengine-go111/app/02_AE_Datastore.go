@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -15,18 +16,28 @@ type Benkyo struct {
 func handleAEDatastore(g *gin.Context) {
 	c := appengine.NewContext(g.Request)
 
-	k := datastore.NewKey(c, "Benkyo", "BK1", 0, nil)
+	b := Benchmarker{}
 
-	_, err := datastore.Put(c, k, &Benkyo{
-		Name: "Benkyo-name",
-	})
-	if err != nil {
-		log.Errorf(c, "datastore put error. %s", err)
-		g.String(http.StatusInternalServerError, err.Error())
-		return
+	// 30回実行
+	for i:= 0; i< 30;i++{
+		count := fmt.Sprintf("%d", i + 1)
+		k := datastore.NewKey(c, "Benkyo", "BK_" + count, 0, nil)
+		var err error
+		// benchmark実行
+		b.Do(c, func() {
+			_, err = datastore.Put(c, k, &Benkyo{
+				Name: "Benkyo-name",
+			})
+		})
+		if err != nil {
+			log.Errorf(c, "datastore put error. %s", err)
+			g.String(http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
-	log.Infof(c, "datastore put success. %v", k)
+	log.Infof(c, "datastore put success.")
+	log.Infof(c, "Result : %s", b.Result())
 
 	// response
 	g.String(http.StatusOK, "02_AE_Datastore")
@@ -37,30 +48,16 @@ func handleAEDatastoreRead(g *gin.Context) {
 
 	k := datastore.NewKey(c, "Benkyo", "BK1", 0, nil)
 
-	// 3回Datastoreから取得する
-	{
-		bk := &Benkyo{}
-		err := datastore.Get(c, k, bk)
-		if err != nil {
-			log.Errorf(c, "datastore get error. %s", err)
-			g.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
+	b := Benchmarker{}
 
-	{
+	// 30回実行
+	for i := 0; i <= 30 ; i++ {
 		bk := &Benkyo{}
-		err := datastore.Get(c, k, bk)
-		if err != nil {
-			log.Errorf(c, "datastore get error. %s", err)
-			g.String(http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
-
-	{
-		bk := &Benkyo{}
-		err := datastore.Get(c, k, bk)
+		var err error
+		// benchmark実行
+		b.Do(c, func() {
+			err = datastore.Get(c, k, bk)
+		})
 		if err != nil {
 			log.Errorf(c, "datastore get error. %s", err)
 			g.String(http.StatusInternalServerError, err.Error())
@@ -69,6 +66,7 @@ func handleAEDatastoreRead(g *gin.Context) {
 	}
 
 	log.Infof(c, "datastore get success. %v", k)
+	log.Infof(c, "Result : %s", b.Result())
 
 	// response
 	g.String(http.StatusOK, "02_AE_Datastore/read")
