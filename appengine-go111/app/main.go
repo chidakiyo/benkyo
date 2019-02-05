@@ -38,6 +38,11 @@ func main() {
 	// delay packageの動作確認
 	route.GET("/06", handleTQDelay)
 
+
+	// ベンチマーク用
+	route.GET("/91/init", handleInit)
+	route.GET("/91", handlePerformance)
+
 	appengine.Main() // Listen
 }
 
@@ -49,7 +54,7 @@ func disableGinDebugLog(){
 }
 
 type Benchmarker struct {
-	results []int
+	results []int64
 }
 
 func (b *Benchmarker) Do(c context.Context, f func()) {
@@ -57,22 +62,21 @@ func (b *Benchmarker) Do(c context.Context, f func()) {
 	// ---- Do start ----
 	start :=  time.Now()
 	f()
-	end := time.Now()
+	diff := time.Since(start)
 	// ---- Do end ----
 
-	diff := end.Nanosecond() - start.Nanosecond()
 	if b.results == nil {
-		b.results = []int{}
+		b.results = []int64{}
 	}
-	b.results = append(b.results, diff)
+	b.results = append(b.results, diff.Nanoseconds())
 	log.Infof(c, "time : %d msec. %d nanosec", diff / 1e6, diff)
 }
 
 func(b *Benchmarker) Result() string {
-	max := 0
-	min := math.MaxInt32
+	max := int64(0)
+	min := int64(math.MaxInt64)
 	var avg float64
-	total := 0
+	total := int64(0)
 	for _, v := range b.results {
 		if max < v {
 			max = v
