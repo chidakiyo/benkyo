@@ -20,14 +20,17 @@ func main() {
 	// ログの出力がリクエストスコープでまとまるか
 	route.GET("/01", handleLog)
 
-	// AE Datastoreでputする際のtrace
+	// AE Datastoreでputする
 	route.GET("/02", handleAEDatastore)
 
-	// AE Datastoreでgetする際のtrace
+	// AE Datastoreでgetする
 	route.GET("/02/get", handleAEDatastoreRead)
 
-	// Cloud Datastoreでputする際のtrace
+	// Cloud Datastoreでputするj
 	route.GET("/03", handleCloudDatastore)
+
+	// Cloud Datastoreでreadする
+	route.GET("/03/get", handleCloudDatastoreRead)
 
 	// urlfetchのtraceの確認
 	route.GET("/04", handleUrlFetch)

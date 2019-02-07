@@ -13,6 +13,7 @@ type Benkyo struct {
 	Name string `datastore:"name"`
 }
 
+// 書き込みテスト
 func handleAEDatastore(g *gin.Context) {
 	c := appengine.NewContext(g.Request)
 
@@ -43,6 +44,7 @@ func handleAEDatastore(g *gin.Context) {
 	g.String(http.StatusOK, "02_AE_Datastore")
 }
 
+// 読み出しテスト
 func handleAEDatastoreRead(g *gin.Context) {
 	c := appengine.NewContext(g.Request)
 
