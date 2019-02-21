@@ -46,6 +46,10 @@ func main() {
 	route.GET("/91/init", handleInit)
 	route.GET("/91", handlePerformance)
 
+	// 大陸間ベンチマーク用
+	route.GET("/92/run", handleEchoRun)
+	route.GET("/92", handleEcho)
+
 	appengine.Main() // Listen
 }
 
