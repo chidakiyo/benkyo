@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: initcontainer-test
+spec:
+  initContainers:
+    - name: step1
+      image: alpine
+      command: ["sh", "-c"]
+      args:
+        - |
+          echo Start at `date`; sleep 5; echo End.
+    - name: step2
+      image: alpine
+      command: ["sh", "-c"]
+      args:
+        - |
+          echo Start at `date`; sleep 5; echo End.
+    - name: step3
+      image: alpine
+      command: ["sh", "-c"]
+      args:
+        - |
+          echo Start at `date`; sleep 5; echo End.
+  containers:
+    - name: app1
+      image: alpine
+      command: ["sh", "-c"]
+      args:
+        - |
+          echo Start at `date`; sleep 5; echo End.
+    - name: app2
+      image: alpine
+      command: ["sh", "-c"]
+      args:
+        - |
+          echo Start at `date`; sleep 5; echo End.
+  restartPolicy: Never
+  terminationGracePeriodSeconds: 0

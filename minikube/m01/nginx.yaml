@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      imagePullPolicy: Always
+      command: []
+      args: ["nginx", "-g", "daemon off;"]
+      env:
+        - name: HOGEHOGE
+          value: fugafuga
+      ports:
+        - containerPort: 80
+          protocol: TCP
+      workingDir: /tmp
