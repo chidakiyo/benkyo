@@ -2,7 +2,7 @@ PROJ=chida-test-012
 
 # ローカル環境で動かす
 run:
-	go run ./app/main.go # TODO
+	dev_appserver.py --enable_host_checking=False ./app/app.yaml
 
 # GAEにデプロイする
 deploy:
