@@ -1,0 +1,9 @@
+service: app-a
+runtime: go111
+
+handlers:
+
+- url: /.*
+  script: auto
+
+
