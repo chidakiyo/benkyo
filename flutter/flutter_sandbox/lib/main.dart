@@ -47,11 +47,19 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: ListView(
           children: List.generate(19, (index){
-            return Card(
-              child: ListTile(
-                title: Text("user$index"),
-                leading: Icon(Icons.person),
+            return InkWell(
+              child: Card(
+                child: ListTile(
+                  title: Text("user$index"),
+                  leading: Icon(Icons.person),
+                ),
               ),
+              onTap: (){
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => MyHomePageDetail()));
+              },
             );
           }),
         )
@@ -63,5 +71,23 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+class MyHomePageDetail extends StatefulWidget {
+  @override
+  _MyHomePageDetailState createState() => new _MyHomePageDetailState();
+}
+
+class _MyHomePageDetailState extends State<MyHomePageDetail> {
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Material App"),
+        ),
+        body: Center(
+          child: Text("画面遷移できました"),
+        ));
   }
 }
