@@ -1,0 +1,8 @@
+runtime: go111
+service: client
+
+handlers:
+  - url: /.*
+    script: auto
+
+
