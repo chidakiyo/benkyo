@@ -1,8 +1,9 @@
-runtime: go111
+runtime: go112
 service: client
 
 handlers:
   - url: /.*
     script: auto
 
-
+env_variables:
+  ID_TOKEN_AUDIENCE: "test@hoge.com"

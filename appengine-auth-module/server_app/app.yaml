@@ -1,5 +1,5 @@
 runtime: go111
-service: default # defaultが必要なため
+service: server
 
 handlers:
   - url: /.*
