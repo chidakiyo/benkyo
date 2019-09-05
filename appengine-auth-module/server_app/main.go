@@ -22,6 +22,7 @@ func main() {
 			context.AbortWithError(http.StatusUnauthorized, fmt.Errorf("No Authorization header found"))
 			return
 		}
+		fmt.Printf("# BearerHeader: %s\n", bearerHeader)
 
 		re := regexp.MustCompile(`^\s*Bearer\s+(.+)$`)
 		matched := re.FindStringSubmatch(bearerHeader)
@@ -29,11 +30,13 @@ func main() {
 			context.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Authorization header is invalid format"))
 			return
 		}
+		fmt.Printf("# Matched Result: %v\n", matched)
 		bearerToken := matched[1]
 
 		// Verify ID Token
 		token, err := jwt.ParseWithClaims(bearerToken, &IdTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 			kid := token.Header["kid"].(string)
+			fmt.Printf("# kid: %s\n", kid)
 
 			// Get certificate
 			resp, err := http.Get("https://www.googleapis.com/oauth2/v1/certs")
@@ -48,12 +51,16 @@ func main() {
 			}
 			cert := jsonBody.(map[string]interface{})[kid].(string)
 
+			fmt.Printf("# JsonBody: %+v\n", jsonBody)
+
 			return jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
 		})
 		if err != nil {
 			context.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Invalid token: %s", err))
 			return
 		}
+		fmt.Printf("# token: %+v\n", token)
+		fmt.Printf("# token Claims: %+v\n", token.Claims)
 
 		claims, ok := token.Claims.(*IdTokenClaims)
 		if !(ok && token.Valid) {
@@ -75,7 +82,7 @@ func main() {
 			return
 		}
 
-		fmt.Printf("%#v\n", token)
+		fmt.Printf("# Claims: %#v\n", claims)
 		context.String(http.StatusOK, "Request by: %s", claims.Email)
 	})
 
