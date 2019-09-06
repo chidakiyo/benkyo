@@ -94,7 +94,6 @@ func main() {
 		if c == '\n' {
 			infield = false
 			pos = field - 1
-			//fmt.Println(string(s))
 			w.Write(s)
 			s = []byte{} // カラにする
 		}

@@ -1,5 +1,5 @@
 build:
-	go build -o cut
+	go build cut.go
 
 run:
 	time ./cut -f 3 -d ',' 50000_target.csv > /dev/null
