@@ -22,8 +22,8 @@
 package main
 
 import (
+	"bufio"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -52,23 +52,20 @@ func main() {
 	}
 	defer f.Close()
 
-	pro,err := os.Create("profile")
-	if err != nil {
-		panic(err)
-	}
-	err = pprof.StartCPUProfile(pro)
-	if err != nil {
-		panic(err)
-	}
+	pro,_ := os.Create("profile")
+	defer pro.Close()
+	pprof.StartCPUProfile(pro)
 	defer pprof.StopCPUProfile()
 
 	infield := false
 	pos := field - 1
 	s := []byte{}
+	var buf [1]byte
+	r := bufio.NewReader(f)
+	w := bufio.NewWriter(os.Stdout)
 	for {
 		// ファイルからの読み込みが出来ない場合やファイル末尾の場合は終了する
-		var buf [1]byte
-		_, err := f.Read(buf[:])
+		_, err := r.Read(buf[:])
 		if err == io.EOF {
 			break
 		}
@@ -97,7 +94,8 @@ func main() {
 		if c == '\n' {
 			infield = false
 			pos = field - 1
-			fmt.Println(string(s))
+			//fmt.Println(string(s))
+			w.Write(s)
 			s = []byte{}
 		}
 		if infield {
