@@ -7,3 +7,5 @@ deploy_client:
 
 deploy_server:
 	gcloud app deploy --project $(PROJECT_ID) --quiet ./server_app/app.yaml
+
+deploy_all: deploy_client deploy_server
