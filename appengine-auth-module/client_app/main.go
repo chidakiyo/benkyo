@@ -2,20 +2,76 @@ package main
 
 import (
 	"cloud.google.com/go/compute/metadata"
+	"cloud.google.com/go/profiler"
+	"context"
+	"contrib.go.opencensus.io/exporter/stackdriver"
+	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/appengine"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
+
+	// profiler
+	if err := profiler.Start(profiler.Config{
+		//DebugLogging: true,
+	}); err != nil {
+		panic("プロファイラの起動に失敗 : " + err.Error())
+	}
+
+	// trace
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{
+		//ProjectID: os.Getenv("GOOGLE_CLOUD_PROJECT"),
+	})
+	if err != nil {
+		fmt.Println("Stackdriver exporter initialize NG.")
+		panic(err)
+	}
+	fmt.Println("Stackdriver exporter initialize OK.")
+	trace.RegisterExporter(exporter)
+	defer exporter.Flush()
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()}) // 毎回取得
+
 	route := gin.Default()
 	http.Handle("/", route)
 
 	route.GET("/", handle)
-	appengine.Main()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	server := &http.Server{
+		Addr: fmt.Sprintf(":%s", port),
+		Handler: &ochttp.Handler{
+			Handler:     route,
+			Propagation: &propagation.HTTPFormat{},
+		},
+	}
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			panic(err)
+		}
+	}()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGTERM)
+	<-sigCh
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		panic(err)
+	}
 }
 
 func handle(context *gin.Context) {
@@ -32,7 +88,7 @@ func handle(context *gin.Context) {
 
 	// Call backend service
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", fmt.Sprintf("https://server-dot-%s.appspot.com", projectId), nil)
+	req, err := http.NewRequestWithContext(context.Request.Context(), "GET", fmt.Sprintf("https://server-dot-%s.appspot.com", projectId), nil)
 	req.Header.Add("Authorization", "Bearer "+idToken)
 	if err != nil {
 		context.AbortWithError(http.StatusInternalServerError, err)
