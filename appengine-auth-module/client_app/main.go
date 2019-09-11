@@ -77,23 +77,33 @@ func main() {
 func handle(context *gin.Context) {
 
 	// ProjectID
+	_, spanPrjID := trace.StartSpan(context.Request.Context(), "pid")
 	projectId := getProjectID()
 	fmt.Println(projectId) // TODO
 
+	spanPrjID.Annotate([]trace.Attribute{trace.StringAttribute("key", "value")}, "something happened")
+	spanPrjID.AddAttributes(trace.StringAttribute("hello", "world"))
+
+	spanPrjID.End()
+
 	// audience
+	_, spanAud := trace.StartSpan(context.Request.Context(), "aud")
 	audience := os.Getenv("ID_TOKEN_AUDIENCE")
 	fmt.Printf("Audience: %s\n", audience)
+	spanAud.End()
 
 	// ID_Token
+	_, spanToken := trace.StartSpan(context.Request.Context(), "token")
 	idToken := generateToken(audience)
 	fmt.Println(idToken) // TODO
+	spanToken.End()
 
 	// Call backend service
-	client := &http.Client{}
-	ctx := context.Request.Context()
+	ctx2, spanBackend := trace.StartSpan(context.Request.Context(), "backend")
+	client := &http.Client{Transport: &ochttp.Transport{}}
 	path := fmt.Sprintf("https://server-dot-%s.appspot.com", projectId)
 	req, err := http.NewRequest("GET", path, nil)
-	req = req.WithContext(ctx)
+	req = req.WithContext(ctx2)
 	//req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	req.Header.Add("Authorization", "Bearer "+idToken)
 	if err != nil {
@@ -113,6 +123,7 @@ func handle(context *gin.Context) {
 		context.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	spanBackend.End()
 
 	context.String(http.StatusOK, "Response from backend:\n  %s", string(b))
 }

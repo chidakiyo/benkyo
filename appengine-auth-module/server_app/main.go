@@ -78,6 +78,7 @@ func main() {
 
 func middleware(g *gin.Context) {
 	// Fetch Authorization Header
+	_, spanHeader := trace.StartSpan(g.Request.Context(), "header")
 	bearerHeader := g.Request.Header.Get("Authorization")
 	if bearerHeader == "" {
 		g.AbortWithError(http.StatusUnauthorized, fmt.Errorf("No Authorization header found"))
@@ -85,7 +86,9 @@ func middleware(g *gin.Context) {
 		return
 	}
 	fmt.Printf("# BearerHeader: %s\n", bearerHeader)
+	spanHeader.End()
 
+	_, spanHeader2 := trace.StartSpan(g.Request.Context(), "header_parse")
 	re := regexp.MustCompile(`^\s*Bearer\s+(.+)$`)
 	matched := re.FindStringSubmatch(bearerHeader)
 	if len(matched) != 2 {
@@ -96,10 +99,12 @@ func middleware(g *gin.Context) {
 	fmt.Printf("# Matched Result: %v\n", matched)
 	bearerToken := matched[1]
 	g.Set("TOKEN", bearerToken) // set token.
+	spanHeader2.End()
 }
 
-func verifyToken(g *gin.Context, bearerToken string) (IdTokenClaims, bool) {
+func verifyToken(c context.Context, g *gin.Context, bearerToken string) (IdTokenClaims, bool) {
 	// Verify ID Token
+	_, spanVfy := trace.StartSpan(c, "verify_token")
 	token, err := jwt.ParseWithClaims(bearerToken, &IdTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		kid := token.Header["kid"].(string)
 		fmt.Printf("# kid: %s\n", kid)
@@ -127,7 +132,9 @@ func verifyToken(g *gin.Context, bearerToken string) (IdTokenClaims, bool) {
 	}
 	fmt.Printf("# token: %+v\n", token)
 	fmt.Printf("# token Claims: %+v\n", token.Claims)
+	spanVfy.End()
 
+	_, spanClaims := trace.StartSpan(c, "claim")
 	claims, ok := token.Claims.(*IdTokenClaims)
 	if !(ok && token.Valid) {
 		g.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Invalid token"))
@@ -140,6 +147,7 @@ func verifyToken(g *gin.Context, bearerToken string) (IdTokenClaims, bool) {
 		g.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Invalid token: email is invalid, %s\n", claims.Email))
 		return IdTokenClaims{}, false
 	}
+	spanClaims.End()
 
 	return *claims, true
 }
@@ -147,7 +155,9 @@ func verifyToken(g *gin.Context, bearerToken string) (IdTokenClaims, bool) {
 func handle(context *gin.Context) {
 
 	bearerToken, _ := context.Get("TOKEN")
-	claims, _ := verifyToken(context, bearerToken.(string))
+	ctx, spanHeader := trace.StartSpan(context.Request.Context(), "verify")
+	claims, _ := verifyToken(ctx, context, bearerToken.(string))
+	spanHeader.End()
 
 	fmt.Printf("# Claims: %#v\n", claims)
 	context.String(http.StatusOK, "Request by: %s", claims.Email)
