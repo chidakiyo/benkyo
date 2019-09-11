@@ -78,6 +78,7 @@ func handle(context *gin.Context) {
 
 	// ProjectID
 	projectId := getProjectID()
+	fmt.Println(projectId) // TODO
 
 	// audience
 	audience := os.Getenv("ID_TOKEN_AUDIENCE")
@@ -85,10 +86,15 @@ func handle(context *gin.Context) {
 
 	// ID_Token
 	idToken := generateToken(audience)
+	fmt.Println(idToken) // TODO
 
 	// Call backend service
 	client := &http.Client{}
-	req, err := http.NewRequestWithContext(context.Request.Context(), "GET", fmt.Sprintf("https://server-dot-%s.appspot.com", projectId), nil)
+	ctx := context.Request.Context()
+	path := fmt.Sprintf("https://server-dot-%s.appspot.com", projectId)
+	req, err := http.NewRequest("GET", path, nil)
+	req = req.WithContext(ctx)
+	//req, err := http.NewRequestWithContext(ctx, "GET", path, nil)
 	req.Header.Add("Authorization", "Bearer "+idToken)
 	if err != nil {
 		context.AbortWithError(http.StatusInternalServerError, err)
