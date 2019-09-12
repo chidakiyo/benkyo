@@ -128,6 +128,7 @@ func verifyToken(c context.Context, g *gin.Context, bearerToken string) (IdToken
 		spanDecode.End()
 
 		fmt.Printf("# JsonBody: %+v\n", jsonBody)
+		fmt.Printf("# Cert: %+v\n", cert)
 
 		_, spanPemParse := trace.StartSpan(cc, "parse_pem")
 		x,y := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
@@ -164,6 +165,8 @@ func verifyToken(c context.Context, g *gin.Context, bearerToken string) (IdToken
 func handle(context *gin.Context) {
 
 	bearerToken, _ := context.Get("TOKEN")
+	fmt.Printf("Baarer Token: %s\n", bearerToken)
+
 	ctx, spanHeader := trace.StartSpan(context.Request.Context(), "verify")
 	claims, _ := verifyToken(ctx, context, bearerToken.(string))
 	spanHeader.End()
