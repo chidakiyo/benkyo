@@ -6,4 +6,4 @@ handlers:
     script: auto
 
 env_variables:
-  ID_TOKEN_AUDIENCE: "test@hoge.com"
+  ID_TOKEN_AUDIENCE: "hoge_service"
