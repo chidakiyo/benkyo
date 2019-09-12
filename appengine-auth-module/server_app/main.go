@@ -104,27 +104,36 @@ func middleware(g *gin.Context) {
 
 func verifyToken(c context.Context, g *gin.Context, bearerToken string) (IdTokenClaims, bool) {
 	// Verify ID Token
-	_, spanVfy := trace.StartSpan(c, "verify_token")
+	cc, spanVfy := trace.StartSpan(c, "verify_token")
 	token, err := jwt.ParseWithClaims(bearerToken, &IdTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		kid := token.Header["kid"].(string)
 		fmt.Printf("# kid: %s\n", kid)
 
 		// Get certificate
+		_, spanReq := trace.StartSpan(cc, "verify_request")
 		resp, err := http.Get("https://www.googleapis.com/oauth2/v1/certs")
 		if err != nil {
 			return nil, err
 		}
 		defer resp.Body.Close()
+		spanReq.End()
+
+		_, spanDecode := trace.StartSpan(cc, "decode_certs")
 		decoder := json.NewDecoder(resp.Body)
 		var jsonBody interface{}
 		if err := decoder.Decode(&jsonBody); err != nil {
 			return nil, err
 		}
 		cert := jsonBody.(map[string]interface{})[kid].(string)
+		spanDecode.End()
 
 		fmt.Printf("# JsonBody: %+v\n", jsonBody)
 
-		return jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
+		_, spanPemParse := trace.StartSpan(cc, "parse_pem")
+		x,y := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
+		spanPemParse.End()
+
+		return x, y
 	})
 	if err != nil {
 		g.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Invalid token: %s", err))
