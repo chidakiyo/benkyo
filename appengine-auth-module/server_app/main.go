@@ -6,6 +6,7 @@ import (
 	"context"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
+	"crypto/rsa"
 	"encoding/json"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
@@ -16,6 +17,7 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -102,39 +104,40 @@ func middleware(g *gin.Context) {
 	spanHeader2.End()
 }
 
+type TokenCache struct {
+	PubKey rsa.PublicKey
+	TTL    time.Time
+}
+var tokenCache = sync.Map{}
+
 func verifyToken(c context.Context, g *gin.Context, bearerToken string) (IdTokenClaims, bool) {
 	// Verify ID Token
 	cc, spanVfy := trace.StartSpan(c, "verify_token")
-	token, err := jwt.ParseWithClaims(bearerToken, &IdTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		kid := token.Header["kid"].(string)
+	token, err := jwt.ParseWithClaims(bearerToken, &IdTokenClaims{}, func(parsedToken *jwt.Token) (interface{}, error) {
+		kid := parsedToken.Header["kid"].(string)
+		fmt.Printf("# ParsedToken: %+v\n", parsedToken)
+		fmt.Printf("# ParsedClaims: %+v\n", parsedToken.Claims)
+		fmt.Printf("# ParsedSigningMethod: %+v\n", parsedToken.Method)
 		fmt.Printf("# kid: %s\n", kid)
 
-		// Get certificate
-		_, spanReq := trace.StartSpan(cc, "verify_request")
-		resp, err := http.Get("https://www.googleapis.com/oauth2/v1/certs")
-		if err != nil {
-			return nil, err
+		audience := parsedToken.Claims.(*IdTokenClaims).Audience
+		_cachedToken, ok := tokenCache.Load(audience)
+		cachedToken := _cachedToken.(TokenCache)
+		if ok {
+			key := cachedToken.PubKey
+			return &key, nil
+		} else {
+			// Get certificate
+			key, err := getCert(cc, kid)
+
+			// cache put
+			tokenCache.Store(audience,
+				TokenCache{
+					PubKey: *key,
+					TTL:    time.Now(),
+				})
+			return key, err
 		}
-		defer resp.Body.Close()
-		spanReq.End()
-
-		_, spanDecode := trace.StartSpan(cc, "decode_certs")
-		decoder := json.NewDecoder(resp.Body)
-		var jsonBody interface{}
-		if err := decoder.Decode(&jsonBody); err != nil {
-			return nil, err
-		}
-		cert := jsonBody.(map[string]interface{})[kid].(string)
-		spanDecode.End()
-
-		fmt.Printf("# JsonBody: %+v\n", jsonBody)
-		fmt.Printf("# Cert: %+v\n", cert)
-
-		_, spanPemParse := trace.StartSpan(cc, "parse_pem")
-		x,y := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
-		spanPemParse.End()
-
-		return x, y
 	})
 	if err != nil {
 		g.AbortWithError(http.StatusUnauthorized, fmt.Errorf("Invalid token: %s", err))
@@ -162,13 +165,52 @@ func verifyToken(c context.Context, g *gin.Context, bearerToken string) (IdToken
 	return *claims, true
 }
 
+func getCert(ctx context.Context, kid string) (*rsa.PublicKey, error) {
+
+	// Get certificate
+	_, spanReq := trace.StartSpan(ctx, "verify_request")
+	resp, err := http.Get("https://www.googleapis.com/oauth2/v1/certs")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	spanReq.End()
+
+	_, spanDecode := trace.StartSpan(ctx, "decode_certs")
+	decoder := json.NewDecoder(resp.Body)
+	var jsonBody interface{}
+	if err := decoder.Decode(&jsonBody); err != nil {
+		return nil, err
+	}
+	cert := jsonBody.(map[string]interface{})[kid].(string)
+	spanDecode.End()
+
+	fmt.Printf("# JsonBody: %+v\n", jsonBody)
+	fmt.Printf("# Cert: %+v\n", cert)
+
+	_, spanPemParse := trace.StartSpan(ctx, "parse_pem")
+	pubKey, err := jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
+	spanPemParse.End()
+
+	return pubKey, err
+}
+
 func handle(context *gin.Context) {
 
-	bearerToken, _ := context.Get("TOKEN")
+	_bearerToken, _ := context.Get("TOKEN")
+	bearerToken := _bearerToken.(string)
 	fmt.Printf("Baarer Token: %s\n", bearerToken)
 
+	//fmt.Printf("tokenCache size : %d\n", len(tokenCache))
+	//if len(tokenCache) > 0 {
+	//	for k, v := range tokenCache {
+	//		fmt.Printf("==> key: %v\n", k)
+	//		fmt.Printf("==> value: %v\n", v)
+	//	}
+	//}
+
 	ctx, spanHeader := trace.StartSpan(context.Request.Context(), "verify")
-	claims, _ := verifyToken(ctx, context, bearerToken.(string))
+	claims, _ := verifyToken(ctx, context, bearerToken)
 	spanHeader.End()
 
 	fmt.Printf("# Claims: %#v\n", claims)
