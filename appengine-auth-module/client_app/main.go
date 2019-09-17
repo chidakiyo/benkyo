@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -128,7 +129,18 @@ func handle(context *gin.Context) {
 	context.String(http.StatusOK, "Response from backend:\n  %s", string(b))
 }
 
+type KeyCache struct {
+	Key	string
+	TTL    time.Time
+}
+var keyCache = sync.Map{}
+
 func generateToken(audience string) string {
+	_key, ok := keyCache.Load(audience)
+	if ok {
+		key := _key.(KeyCache).Key
+		return key
+	}
 	idToken, err := metadata.Get("instance/service-accounts/default/identity?audience=" + audience)
 	if err != nil {
 		panic(err) // TODO 手抜き

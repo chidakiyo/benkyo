@@ -122,8 +122,8 @@ func verifyToken(c context.Context, g *gin.Context, bearerToken string) (IdToken
 
 		audience := parsedToken.Claims.(*IdTokenClaims).Audience
 		_cachedToken, ok := tokenCache.Load(audience)
-		cachedToken := _cachedToken.(TokenCache)
 		if ok {
+			cachedToken := _cachedToken.(TokenCache)
 			key := cachedToken.PubKey
 			return &key, nil
 		} else {
