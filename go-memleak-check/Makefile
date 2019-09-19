@@ -1,6 +1,6 @@
 
 run:
-	go run main.go
+	go run ./...
 
 start-database:
 	@echo "FIRESTORE_EMULATOR_HOST 環境変数を設定してください。"
@@ -8,3 +8,6 @@ start-database:
 
 env-init:
 	$(gcloud beta emulators datastore env-init)
+
+run-gae:
+	dev_appserver.py --enable_host_checking=False ./app.yaml
