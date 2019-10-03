@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"github.com/gin-gonic/gin"
@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func appengineDatastore(g *gin.Context) {
+func AppengineDatastore(g *gin.Context) {
 
 	c := appengine.NewContext(g.Request)
 

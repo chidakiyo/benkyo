@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"cloud.google.com/go/datastore"
@@ -8,19 +8,31 @@ import (
 	"os"
 )
 
-func officialDatastore(g *gin.Context) {
+//var client *datastore.Client
+//var initialized bool
+
+func OfficialDatastore(g *gin.Context) {
 
 	c := g.Request.Context()
 	ProjID := os.Getenv("PROJECT_ID")
+	//if !initialized {
+	//	_client, err := datastore.NewClient(c, ProjID)
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//	client = _client
+	//	initialized = true
+	//}
 	client, err := datastore.NewClient(c, ProjID)
 	if err != nil {
 		panic(err)
 	}
+	defer client.Close()
 
 	xid := xid.New()
 
 	// create key
-	key := datastore.NameKey("kind1",xid.String(), nil )
+	key := datastore.NameKey("kind1", xid.String(), nil)
 
 	_, err = client.Put(c, key, &struct {
 		hoge string

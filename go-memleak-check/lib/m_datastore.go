@@ -1,4 +1,4 @@
-package main
+package lib
 
 import (
 	"github.com/gin-gonic/gin"
@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func mercariDatastore(g *gin.Context) {
+func MercariDatastore(g *gin.Context) {
 
 	c := g.Request.Context()
 	ProjID := os.Getenv("PROJECT_ID")
