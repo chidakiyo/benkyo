@@ -1,0 +1,14 @@
+runtime: go111
+service: default
+
+inbound_services:
+  - mail
+
+handlers:
+  - url: /_ah/mail/.+
+    script: auto
+    login: admin
+
+  - url: /.*
+    script: auto
+
