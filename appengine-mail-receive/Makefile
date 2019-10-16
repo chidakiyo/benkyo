@@ -5,3 +5,5 @@ run:
 deploy:
 	gcloud app deploy --project $(PROJECT_ID) --quiet ./app/app.yaml
 
+deploy-nopromote:
+	gcloud app deploy --project $(PROJECT_ID) --quiet --no-promote ${PROMOTE} ./app/app.yaml
