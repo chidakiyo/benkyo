@@ -1,3 +1,0 @@
-runtime: go111
-service: leak-01
-version: 0.0.2
