@@ -32,10 +32,3 @@ func Test_Cancelでキャンセル(t *testing.T) {
 
 	t.Logf("finish")
 }
-
-
-
-
-
-
-

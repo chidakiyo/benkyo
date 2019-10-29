@@ -7,10 +7,12 @@ import (
 	"fmt"
 	"github.com/chidakiyo/benkyo/go-memleak-check/lib"
 	"github.com/chidakiyo/benkyo/go-memleak-check/log"
+	"github.com/gin-contrib/pprof" // see. https://qiita.com/junpayment/items/23934772f5385304eba8
 	"github.com/gin-gonic/gin"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
 	"net/http"
+	//_ "net/http/pprof" // pprof
 	"os"
 	"os/signal"
 	"runtime"
@@ -34,6 +36,7 @@ func main() {
 			i.String(http.StatusOK, "goro :[%s] %d", os.Getenv("GAE_INSTANCE"), runtime.NumGoroutine())
 		})
 
+		pprof.Register(e)
 		// --------- Handler ----------
 	},
 		func() {}, // noop
@@ -44,7 +47,7 @@ func main() {
 // Bootstrap はmicroservice(appengine以外でも)を起動する共通のmain処理
 func Bootstrap(routing func(e *gin.Engine), conf func(), middleware ...gin.HandlerFunc) *Bootstrapper {
 
-	gin.SetMode(gin.ReleaseMode) // debug出力を抑制
+	//gin.SetMode(gin.ReleaseMode) // debug出力を抑制
 	r := gin.Default()
 	r.Use(middleware...)
 	http.Handle("/", r)
@@ -53,6 +56,7 @@ func Bootstrap(routing func(e *gin.Engine), conf func(), middleware ...gin.Handl
 	fmt.Println("config initialize OK.")
 
 	exporter, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID:GetProjectID(),
 	})
 	if err != nil {
 		fmt.Println("Stackdriver exporter initialize NG.")
@@ -127,4 +131,15 @@ func LoggingMiddleware(module string) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+func GetProjectID() string {
+	if v := os.Getenv("GCP_PROJECT"); v != "" {
+		return v
+	} else if v := os.Getenv("GOOGLE_CLOUD_PROJECT"); v != "" {
+		return v
+	} else if v := os.Getenv("GCLOUD_PROJECT"); v != "" {
+		return v
+	}
+	return ""
 }
