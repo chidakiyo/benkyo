@@ -22,8 +22,26 @@ func RandStream(g *gin.Context) {
 	var buf []byte
 	b := genBytes(bit)
 	buf = append(buf, *b...)
-	log.Info(c, "byte: %v", buf)
-	g.String(http.StatusOK, "%v", buf)
+	log.Info(c, "byte: %v", len(buf))
+	g.String(http.StatusOK, "%v", len(buf)) // responseはデータのサイズ
+}
+
+func RandStreamString(g *gin.Context) {
+	c := g.Request.Context()
+
+	bit := uint64(0)
+	bitSt := g.Query("b")
+	if bitSt == "" {
+		bit = 8
+	} else {
+		bit, _ = strconv.ParseUint(bitSt, 10, 64)
+	}
+
+	var buf []byte
+	b := genBytes(bit)
+	buf = append(buf, *b...)
+	log.Info(c, "byte: %v", len(buf))
+	g.String(http.StatusOK, "%v", buf) // responseはデータそのものをstring化
 }
 
 func genBytes(bit uint64) *[]byte {

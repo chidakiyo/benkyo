@@ -34,9 +34,15 @@ func main() {
 		e.GET("context_loop", lib.ContextLoop)
 
 		e.GET("rand_01", lib.RandStream)
+		e.GET("rand_02", lib.RandStreamString)
 
 		e.GET("goro", func(i *gin.Context) {
 			i.String(http.StatusOK, "goro :[%s] %d", os.Getenv("GAE_INSTANCE"), runtime.NumGoroutine())
+		})
+		e.GET("gome", func(i *gin.Context) {
+			var mem runtime.MemStats
+			runtime.ReadMemStats(&mem)
+			i.String(http.StatusOK, "gome :[%s] alloc: %d, total_alloc: %d, heap_alloc: %d, heap_sys: %d", os.Getenv("GAE_INSTANCE"), mem.Alloc, mem.TotalAlloc, mem.HeapAlloc, mem.HeapSys)
 		})
 
 		pprof.Register(e)
