@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cloud.google.com/go/profiler"
 	"context"
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
@@ -32,6 +33,8 @@ func main() {
 		e.GET("context_without", lib.ContextLeakWithoutCancel)
 		e.GET("context_loop", lib.ContextLoop)
 
+		e.GET("rand_01", lib.RandStream)
+
 		e.GET("goro", func(i *gin.Context) {
 			i.String(http.StatusOK, "goro :[%s] %d", os.Getenv("GAE_INSTANCE"), runtime.NumGoroutine())
 		})
@@ -46,6 +49,12 @@ func main() {
 
 // Bootstrap はmicroservice(appengine以外でも)を起動する共通のmain処理
 func Bootstrap(routing func(e *gin.Engine), conf func(), middleware ...gin.HandlerFunc) *Bootstrapper {
+
+	if err := profiler.Start(profiler.Config{
+		//DebugLogging: true,
+	}); err != nil {
+		panic("プロファイラの起動に失敗 : " + err.Error())
+	}
 
 	//gin.SetMode(gin.ReleaseMode) // debug出力を抑制
 	r := gin.Default()
