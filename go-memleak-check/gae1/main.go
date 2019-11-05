@@ -42,7 +42,7 @@ func main() {
 		e.GET("gome", func(i *gin.Context) {
 			var mem runtime.MemStats
 			runtime.ReadMemStats(&mem)
-			i.String(http.StatusOK, "gome :[%s] alloc: %d, total_alloc: %d, heap_alloc: %d, heap_sys: %d", os.Getenv("GAE_INSTANCE"), mem.Alloc, mem.TotalAlloc, mem.HeapAlloc, mem.HeapSys)
+			i.String(http.StatusOK, "gome :[%s] \nalloc: %d, total_alloc: %d, heap_alloc: %d, heap_sys: %d\n", os.Getenv("GAE_INSTANCE"), mem.Alloc, mem.TotalAlloc, mem.HeapAlloc, mem.HeapSys)
 		})
 
 		pprof.Register(e)
