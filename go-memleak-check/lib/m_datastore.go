@@ -7,6 +7,7 @@ import (
 	"github.com/rs/xid"
 	"go.mercari.io/datastore"
 	"go.mercari.io/datastore/clouddatastore"
+	cdatastore "cloud.google.com/go/datastore"
 	"math/rand"
 	"net/http"
 	"os"
@@ -28,10 +29,33 @@ func MercariDatastoreSearch(g *gin.Context){
 	g.JSON(http.StatusOK, result)
 }
 
+func MercariDatastoreSearchNoDeprecate(g *gin.Context) {
+	c := g.Request.Context()
+	result := searchDaoNd(c)
+	g.JSON(http.StatusOK, result)
+}
+
+func searchDaoNd(c context.Context) []Entity {
+	var result []Entity
+	ProjID := GetProject()
+	cdc,_ := cdatastore.NewClient(c, ProjID)
+	client, err := clouddatastore.FromClient(c,cdc)
+	defer client.Close()
+	if err != nil {
+		log.Fatal(c, "connection error : %v", err)
+		//panic(err)
+		return result
+	}
+	q := client.NewQuery(KIND)
+	client.GetAll(c, q, &result) // TODO error処理適当
+	return result
+}
+
 func searchDao(c context.Context) []Entity {
 	var result []Entity
 	ProjID := GetProject()
 	client, err := clouddatastore.FromContext(c, datastore.WithProjectID(ProjID))
+	defer client.Close()
 	if err != nil {
 		log.Fatal(c, "connection error : %v", err)
 		//panic(err)
@@ -46,6 +70,7 @@ func searchDaoPointer(c context.Context) *[]Entity {
 	var result []Entity
 	ProjID := GetProject()
 	client, err := clouddatastore.FromContext(c, datastore.WithProjectID(ProjID))
+	defer client.Close()
 	if err != nil {
 		log.Fatal(c, "connection error : %v", err)
 		//panic(err)

@@ -29,6 +29,7 @@ func main() {
 		e.GET("md/create", lib.MercariDatastoreCreate)
 		e.GET("md/search_p", lib.MercariDatastoreSearchPointer)
 		e.GET("md/search", lib.MercariDatastoreSearch)
+		e.GET("md/search_nd", lib.MercariDatastoreSearchNoDeprecate)
 
 		e.GET("od/search", lib.OfficialDatastore)
 		e.GET("od/search_p", lib.OfficialDatastorePointer)
