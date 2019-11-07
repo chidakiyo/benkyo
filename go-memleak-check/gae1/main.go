@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/trace"
+	"google.golang.org/appengine"
 	"net/http"
 	//_ "net/http/pprof" // pprof
 	"os"
@@ -24,8 +25,14 @@ import (
 func main() {
 	Bootstrap(func(e *gin.Engine) {
 		// --------- Handler ----------
-		e.GET("ds", lib.MercariDatastore)
-		e.GET("ods", lib.OfficialDatastore)
+		// データストアにテスト用のデータを投入する
+		e.GET("md/create", lib.MercariDatastoreCreate)
+		e.GET("md/search_p", lib.MercariDatastoreSearchPointer)
+		e.GET("md/search", lib.MercariDatastoreSearch)
+
+		e.GET("od/search", lib.OfficialDatastore)
+		e.GET("od/search_p", lib.OfficialDatastorePointer)
+
 		e.GET("ads", lib.AppengineDatastore)
 		e.GET("delete_all", lib.DeleteAll)
 
@@ -42,7 +49,7 @@ func main() {
 		e.GET("gome", func(i *gin.Context) {
 			var mem runtime.MemStats
 			runtime.ReadMemStats(&mem)
-			i.String(http.StatusOK, "gome :[%s] \nalloc: %d, total_alloc: %d, heap_alloc: %d, heap_sys: %d\n", os.Getenv("GAE_INSTANCE"), mem.Alloc, mem.TotalAlloc, mem.HeapAlloc, mem.HeapSys)
+			i.String(http.StatusOK, "gome :[%s] \nalloc: %d, \ntotal_alloc: %d, \nheap_alloc: %d, \nheap_sys: %d\n", os.Getenv("GAE_INSTANCE"), mem.Alloc, mem.TotalAlloc, mem.HeapAlloc, mem.HeapSys)
 		})
 
 		pprof.Register(e)
@@ -59,7 +66,8 @@ func Bootstrap(routing func(e *gin.Engine), conf func(), middleware ...gin.Handl
 	if err := profiler.Start(profiler.Config{
 		//DebugLogging: true,
 	}); err != nil {
-		panic("プロファイラの起動に失敗 : " + err.Error())
+		//panic("プロファイラの起動に失敗 : " + err.Error())
+		fmt.Printf("プロファイラは起動していません :%s", err.Error())
 	}
 
 	//gin.SetMode(gin.ReleaseMode) // debug出力を抑制
@@ -75,11 +83,12 @@ func Bootstrap(routing func(e *gin.Engine), conf func(), middleware ...gin.Handl
 	})
 	if err != nil {
 		fmt.Println("Stackdriver exporter initialize NG.")
-		panic(err)
+		//panic(err)
+		fmt.Printf("exporterは起動していません :%s", err.Error())
 	}
 	fmt.Println("Stackdriver exporter initialize OK.")
 	trace.RegisterExporter(exporter)
-	defer exporter.Flush()
+	//defer exporter.Flush()
 
 	service := os.Getenv("GAE_SERVICE")
 	r.GET("/", func(i *gin.Context) { i.String(http.StatusOK, service) }) // for debug
@@ -106,6 +115,8 @@ func Bootstrap(routing func(e *gin.Engine), conf func(), middleware ...gin.Handl
 			Propagation: &propagation.HTTPFormat{},
 		},
 	}
+
+	appengine.Main()
 
 	return &Bootstrapper{
 		server: server,

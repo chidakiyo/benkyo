@@ -2,41 +2,64 @@ package lib
 
 import (
 	"cloud.google.com/go/datastore"
+	"context"
 	"fmt"
+	"github.com/chidakiyo/benkyo/go-memleak-check/log"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/xid"
 	"net/http"
 	"os"
 )
 
 func OfficialDatastore(g *gin.Context) {
-
 	c := g.Request.Context()
-	ProjID := os.Getenv("PROJECT_ID")
+	result := officialSearchDao(c)
+	g.JSON(http.StatusOK, result)
+}
+
+func OfficialDatastorePointer(g *gin.Context){
+	c := g.Request.Context()
+	result := officialSearchDaoPointer(c)
+	g.JSON(http.StatusOK, result)
+}
+
+func officialSearchDao(c context.Context) []Entity {
+	var result []Entity
+	ProjID := GetProject()
 	client, err := datastore.NewClient(c, ProjID)
 	if err != nil {
-		panic(err)
+		log.Fatal(c, "client create error, %s", err.Error())
+		//panic(err)
+		return result
 	}
 	defer client.Close()
 
-	xid := xid.New()
-
-	// create key
-	key := datastore.NameKey("kind1", xid.String(), nil)
-
-	_, err = client.Put(c, key, &struct {
-		hoge string
-		foo  int
-	}{
-		hoge: "hogehoge",
-		foo:  1,
-	})
+	q := datastore.NewQuery(KIND)
+	_, err = client.GetAll(c, q, &result)
 	if err != nil {
-		panic(err)
+		log.Fatal(c, "fetch error %s", err.Error())
+		return result
 	}
+	return result
+}
 
-	g.String(http.StatusOK, "finish.")
+func officialSearchDaoPointer(c context.Context) *[]Entity {
+	var result []Entity
+	ProjID := GetProject()
+	client, err := datastore.NewClient(c, ProjID)
+	if err != nil {
+		log.Fatal(c, "client create error, %s", err.Error())
+		//panic(err)
+		return &result
+	}
+	defer client.Close()
 
+	q := datastore.NewQuery(KIND)
+	_, err = client.GetAll(c, q, &result)
+	if err != nil {
+		log.Fatal(c, "fetch error %s", err.Error())
+		return &result
+	}
+	return &result
 }
 
 func DeleteAll(g *gin.Context) {

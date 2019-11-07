@@ -15,7 +15,7 @@ func main() {
 	route := gin.Default()
 	http.Handle("/", route)
 
-	route.GET("ds", lib.MercariDatastore)
+	route.GET("ds", lib.MercariDatastoreCreate)
 	route.GET("ods", lib.OfficialDatastore)
 	route.GET("ads", lib.AppengineDatastore)
 
