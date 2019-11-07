@@ -1,13 +1,13 @@
 package lib
 
 import (
+	cdatastore "cloud.google.com/go/datastore"
 	"context"
 	"github.com/chidakiyo/benkyo/go-memleak-check/log"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/xid"
 	"go.mercari.io/datastore"
 	"go.mercari.io/datastore/clouddatastore"
-	cdatastore "cloud.google.com/go/datastore"
 	"math/rand"
 	"net/http"
 	"os"
@@ -23,7 +23,7 @@ func MercariDatastoreSearchPointer(g *gin.Context) {
 	g.JSON(http.StatusOK, result)
 }
 
-func MercariDatastoreSearch(g *gin.Context){
+func MercariDatastoreSearch(g *gin.Context) {
 	c := g.Request.Context()
 	result := searchDao(c)
 	g.JSON(http.StatusOK, result)
@@ -38,8 +38,8 @@ func MercariDatastoreSearchNoDeprecate(g *gin.Context) {
 func searchDaoNd(c context.Context) []Entity {
 	var result []Entity
 	ProjID := GetProject()
-	cdc,_ := cdatastore.NewClient(c, ProjID)
-	client, err := clouddatastore.FromClient(c,cdc)
+	cdc, _ := cdatastore.NewClient(c, ProjID)
+	client, err := clouddatastore.FromClient(c, cdc)
 	defer client.Close()
 	if err != nil {
 		log.Fatal(c, "connection error : %v", err)
