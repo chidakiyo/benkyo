@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"github.com/go-redis/cache/v7"
 	"github.com/go-redis/redis/v7"
+	"github.com/vmihailenco/msgpack/v4"
 	"os"
 	"testing"
 	"time"
@@ -18,7 +20,7 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	client = NewClient()
+	client = NewClient() // setup
 	ret := m.Run()
 	os.Exit(ret)
 }
@@ -41,7 +43,7 @@ func NewClient() *redis.Client {
 func Test_普通のSetGet(t *testing.T) {
 	// set
 	{
-		statusCmd := client.Set(key, value,0)
+		statusCmd := client.Set(key, value, 0)
 		if statusCmd.Err() != nil {
 			t.Fatalf("error!!! %s", statusCmd.Err())
 		}
@@ -61,7 +63,7 @@ func Test_普通のSetGet(t *testing.T) {
 func Test_TTL(t *testing.T) {
 	// set
 	{
-		statusCmd := client.Set(key, value,1 *time.Second) // TTL 2秒j
+		statusCmd := client.Set(key, value, 1*time.Second) // TTL 2秒j
 		if statusCmd.Err() != nil {
 			t.Fatalf("error!!! %s", statusCmd.Err())
 		}
@@ -90,7 +92,6 @@ func Test_TTL(t *testing.T) {
 	}
 }
 
-
 type A struct {
 	Id   string
 	Name string
@@ -117,7 +118,7 @@ func CreateAMock() A {
 	}
 }
 
-// 構造体のSET/GET
+// 構造体のSET/GET gobを利用する
 func Test_構造体をbyteで(t *testing.T) {
 	// set
 	{
@@ -141,5 +142,68 @@ func Test_構造体をbyteで(t *testing.T) {
 
 		t.Logf("result %#v", m)
 	}
+}
 
+func partialCodec() func(*redis.Client) *cache.Codec {
+	return func(client *redis.Client) *cache.Codec {
+		codec := &cache.Codec{
+			Redis: client,
+			Marshal: func(v interface{}) ([]byte, error) {
+				return msgpack.Marshal(v)
+			},
+			Unmarshal: func(b []byte, v interface{}) error {
+				return msgpack.Unmarshal(b, v)
+			},
+		}
+		return codec
+	}
+}
+
+func Test_構造体を入れる(t *testing.T) {
+	client.Get("hoge").String()
+
+	codec := &cache.Codec{
+		Redis: client,
+		Marshal: func(v interface{}) ([]byte, error) {
+			return msgpack.Marshal(v)
+		},
+		Unmarshal: func(b []byte, v interface{}) error {
+			return msgpack.Unmarshal(b, v)
+		},
+	}
+
+	m := CreateAMock()
+
+	codec.Set(&cache.Item{
+		Key:        key,
+		Object:     m,
+		Expiration: time.Hour,
+	})
+
+	var mm A
+	if err := codec.Get(key, &mm); err == nil {
+		t.Logf("result: %#v", mm)
+	}
+}
+
+func Test_onceの振る舞い確認(t *testing.T) {
+	codec := partialCodec()(client)
+
+	var mm A
+	err := codec.Once(&cache.Item{
+		Key:    "key-once",
+		Object: &mm,
+		Func: func() (i interface{}, e error) {
+			t.Logf("ココ実行されたよ")
+			return CreateAMock(), nil
+		},
+		Expiration: 10 * time.Second,
+		//Ctx:
+	})
+
+	if err != nil {
+		t.Fatalf("fail %s", err.Error())
+	}
+
+	t.Logf("success: %#v", mm)
 }
