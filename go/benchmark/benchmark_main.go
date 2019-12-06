@@ -13,5 +13,6 @@ func main() {
 			time.Sleep(1 * time.Millisecond)
 		}
 	})
-	fmt.Printf("%v", result)
+	fmt.Printf("%s", result)
 }
+
