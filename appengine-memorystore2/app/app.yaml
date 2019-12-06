@@ -1,0 +1,13 @@
+runtime: go113
+service: default
+
+handlers:
+  - url: /.*
+    script: auto
+
+vpc_access_connector:
+  name: "projects/PROJECT_ID/locations/REGION/connectors/CONNECTOR_NAME" # 置き換える
+
+env_variables:
+  REDISHOST: ""
+  REDISPORT: ""
