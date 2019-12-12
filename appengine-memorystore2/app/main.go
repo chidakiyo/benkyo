@@ -23,7 +23,10 @@ func main() {
 	r.GET("/", func(g *gin.Context) {g.String(http.StatusOK, "ok")})
 
 	r.GET("/r1_a", redis1.A)
+
 	r.GET("/r2_a", redis2.A)
+	r.GET("/r2_b", redis2.B)
+
 	// -- router --
 
 	port := os.Getenv("PORT")

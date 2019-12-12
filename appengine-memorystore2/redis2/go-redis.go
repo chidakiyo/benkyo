@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"time"
 )
 
 var RedisClient *redis.Client
@@ -23,6 +24,18 @@ func A(g *gin.Context) {
 	r2 := get()
 	fmt.Printf("%s\n%s\n", r1,r2)
 	g.String(http.StatusOK, "%s\n%s\n", r1, r2)
+}
+
+func B(g *gin.Context) {
+	start := time.Now().UnixNano()
+	cmd := RedisClient.Set(key, value, 0)
+	end := time.Now().UnixNano()
+	result := end - start
+	if cmd != nil && cmd.Err() != nil {
+		g.String(http.StatusOK, "ng %d", result/1e6)
+	}
+	g.String(http.StatusOK, "ok %d", result/1e6)
+	//fmt.Printf("%d \n", result/1e6)
 }
 
 const (
@@ -61,8 +74,18 @@ func NewClientWithParam(host, port string) *redis.Client {
 		Addr:     fmt.Sprintf("%s:%s", host, port),
 		Password: "", // no password set
 		DB:       0,  // use default DB
+
+		PoolSize:10,
+		MinIdleConns:10,
+
+		ReadTimeout: 1 * time.Second,
+
+		MaxRetries: 3,
+		DialTimeout: 2 * time.Second,
+
 		OnConnect: func(conn *redis.Conn) error {
-			fmt.Println("-> Redis Connect") // stdoutに出力
+			fmt.Printf("-> Redis Connect %v\n", conn) // stdoutに出力
+			fmt.Printf("%v \n", conn.ClientList())
 			return nil
 		},
 	})
