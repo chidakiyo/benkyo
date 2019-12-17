@@ -1,0 +1,10 @@
+service: ${SERVICE}
+runtime: go113
+
+handlers:
+
+  - url: /.*
+    script: auto
+
+env_variables:
+  MESSAGE: "${MESSAGE}"
