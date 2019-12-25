@@ -2,6 +2,7 @@ package _go
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -135,4 +136,20 @@ func Test_cancelの親子関係の子だけキャンセルしてみる(t *testin
 		t.Log("child:", child.Err())   // 子はキャンセル
 	}
 
+}
+
+func Test_ContextWithTimeoutの振る舞いチェック(t *testing.T) {
+
+	ctx,cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		fmt.Println("Cancell!!")
+		cancel()
+	}()
+
+	select{
+	case <- ctx.Done():
+		fmt.Println("timeout!!!")
+	}
+
+	fmt.Println("end.")
 }
