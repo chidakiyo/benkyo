@@ -1,0 +1,32 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1beta1
+kind: Elasticsearch
+metadata:
+  name: elasticsearch
+  namespace: elastic
+spec:
+  version: 7.4.0
+  nodeSets:
+    - name: node
+      count: 1
+      config:
+        node.master: true
+        node.data: true
+        node.ingest: true
+        node.store.allow_mmap: false
+      podTemplate:
+        spec:
+          volumes:
+            - name: elasticsearch-data
+              hostPath:
+                path: /opt/k8s-elastic
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+    service:
+      spec:
+        ports:
+          - port: 9200
+            targetPort: 9200
+        type: LoadBalancer
+        loadBalancerIP: 192.168.24.103

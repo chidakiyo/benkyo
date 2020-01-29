@@ -1,0 +1,21 @@
+apiVersion: kibana.k8s.elastic.co/v1beta1
+kind: Kibana
+metadata:
+  name: kibana
+  namespace: elastic
+spec:
+  version: 7.4.0
+  count: 1
+  elasticsearchRef:
+    name: elasticsearch
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+    service:
+      spec:
+        ports:
+          - port: 80
+            targetPort: 5601
+        type: LoadBalancer
+        loadBalancerIP: 192.168.24.104
