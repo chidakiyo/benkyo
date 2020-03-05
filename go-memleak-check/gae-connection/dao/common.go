@@ -23,10 +23,10 @@ func Init(project_id string) error {
 
 type (
 	SpecializeXXX struct {
-		conn datastore.Client
+		datastore.Client
 	}
 	SpecializeYYY struct {
-		conn datastore.Client
+		datastore.Client
 	}
 )
 
@@ -47,11 +47,11 @@ func NewZZZ() SpecializeZZZ {
 }
 
 func(c *SpecializeXXX) Do() {
-	c.conn.Context() // mock
+	c.Context() // mock
 }
 
 func(c *SpecializeYYY) Do() {
-	c.conn.Context() // mock
+	c.Context() // mock
 }
 
 // type aliasだとinterfaceに対しては適用ができない
