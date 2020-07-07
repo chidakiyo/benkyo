@@ -1,4 +1,4 @@
-name: test-workflow_dispatch
+name: test-workflow_dispatch_2
 
 on:
   workflow_dispatch:
