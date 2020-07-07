@@ -2,13 +2,12 @@ name: test-workflow_dispatch
 
 on:
   workflow_dispatch:
-  push:
     branches:
       - 'feat/*'
 
 jobs:
   deploy:
-    name: deploy
+    name: execute
     runs-on: ubuntu-latest
 
     steps:
