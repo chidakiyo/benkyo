@@ -2,8 +2,6 @@ name: test-workflow_dispatch
 
 on:
   workflow_dispatch:
-    branches:
-      - 'feat/*'
 
 jobs:
   deploy:
