@@ -146,12 +146,13 @@ func Test_登録したユーザを検索する_key(t *testing.T) {
 	rtx := con.ReadOnlyTransaction()
 	defer rtx.Close()
 
-	iter := rtx.Read(ctx, "User", spanner.Key{"74514912-1b78-4afb-8119-034f8e241e2b"}, []string{"ID", "Email", "UserID", "Password", "CreatedAt", "ModifiedAt"})
+	iter := rtx.Read(ctx, "User", spanner.Key{"U_74514912-1b78-4afb-8119-034f8e241e2b"}, []string{"ID", "Email", "UserID", "Password", "CreatedAt", "ModifiedAt"})
 	defer iter.Stop()
 
 	for {
 		row, err := iter.Next()
 		if err == iterator.Done {
+			t.Logf("Done. %#+v", err)
 			break
 		}
 		if err != nil {
@@ -162,7 +163,7 @@ func Test_登録したユーザを検索する_key(t *testing.T) {
 		if err := row.ToStruct(&user); err != nil {
 			panic(err)
 		}
-		t.Logf("%v\n", user)
+		t.Logf("%#+v\n", user)
 	}
 }
 
@@ -171,7 +172,7 @@ func Test_トランザクション閉じたあとに再度実行(t *testing.T) {
 	rtx := con.ReadOnlyTransaction()
 
 	{
-		iter := rtx.Read(ctx, "User", spanner.Key{"74514912-1b78-4afb-8119-034f8e241e2b"}, []string{"ID", "Email", "UserID", "Password", "CreatedAt", "ModifiedAt"})
+		iter := rtx.Read(ctx, "User", spanner.Key{"U_74514912-1b78-4afb-8119-034f8e241e2b"}, []string{"ID", "Email", "UserID", "Password", "CreatedAt", "ModifiedAt"})
 		for {
 			row, err := iter.Next()
 			if err == iterator.Done {
@@ -192,7 +193,7 @@ func Test_トランザクション閉じたあとに再度実行(t *testing.T) {
 	}
 
 	{
-		iter := rtx.Read(ctx, "User", spanner.Key{"74514912-1b78-4afb-8119-034f8e241e2b"}, []string{"ID", "Email", "UserID", "Password", "CreatedAt", "ModifiedAt"})
+		iter := rtx.Read(ctx, "User", spanner.Key{"U_74514912-1b78-4afb-8119-034f8e241e2b"}, []string{"ID", "Email", "UserID", "Password", "CreatedAt", "ModifiedAt"})
 		for {
 			_, err := iter.Next()
 			if err == iterator.Done {
@@ -211,7 +212,7 @@ func Test_トランザクション閉じたあとに再度実行(t *testing.T) {
 	{
 		rtx = con.ReadOnlyTransaction() // トランザクションを再取得する
 
-		iter := rtx.Read(ctx, "User", spanner.Key{"74514912-1b78-4afb-8119-034f8e241e2b"}, []string{"ID", "Email", "UserID", "Password", "CreatedAt", "ModifiedAt"})
+		iter := rtx.Read(ctx, "User", spanner.Key{"U_74514912-1b78-4afb-8119-034f8e241e2b"}, []string{"ID", "Email", "UserID", "Password", "CreatedAt", "ModifiedAt"})
 		for {
 			row, err := iter.Next()
 			if err == iterator.Done {

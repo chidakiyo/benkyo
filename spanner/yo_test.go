@@ -80,16 +80,42 @@ func Test_データ大量に投入する(t *testing.T) {
 	}
 	tr.Close()
 
+	var muChan = make(chan *spanner.Mutation, 10000)
 	var wg sync.WaitGroup
+
+	// FIXME この辺適当。なおす。
+	go func() {
+		for {
+			var tmp []*spanner.Mutation
+		BRK:
+			for {
+				select {
+				case m := <-muChan:
+					tmp = append(tmp, m)
+					if len(tmp) > 100 {
+						break BRK
+					}
+				}
+			}
+			_, err := con.ReadWriteTransaction(ctx, func(c context.Context, tr *spanner.ReadWriteTransaction) error {
+				return tr.BufferWrite(tmp)
+			})
+			if err != nil {
+				t.Logf("commit fail %v", err)
+			} else {
+				wg.Add(len(tmp) * -1)
+				t.Logf("commit success count:%d", len(tmp))
+			}
+		}
+	}()
+
 	for _, u := range users {
-		for i := 0; i < 1000; i++ {
+		for i := 0; i < 10000; i++ {
 			user := u
-			con := con
 			ctx := ctx
 			wg.Add(1)
 			func() {
-				defer wg.Done()
-				t.Logf("insert : %s", user.ID)
+				//t.Logf("insert : %s", user.ID)
 				start := time.Now()
 
 				text := message_gen()
@@ -103,14 +129,12 @@ func Test_データ大量に投入する(t *testing.T) {
 					ModifiedAt: now,
 				}
 				mut := tw.Insert(ctx)
-				_, err := con.ReadWriteTransaction(ctx, func(c context.Context, tr *spanner.ReadWriteTransaction) error {
-					t.Logf("Insert %v", tw)
-					return tr.BufferWrite([]*spanner.Mutation{mut})
-				})
+				muChan <- mut
 				t.Logf("time : %s [%P]", time.Now().Sub(start), err)
 			}()
 		}
 	}
+	close(muChan)
 	wg.Wait()
 }
 
