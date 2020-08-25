@@ -17,12 +17,13 @@ func NewClient(ctx context.Context, projectID, instance, db string) (*spanner.Cl
 	client, err := spanner.NewClientWithConfig(ctx, dbPath,
 		spanner.ClientConfig{
 			SessionPoolConfig: spanner.SessionPoolConfig{
-				//MinOpened:           100,
-				MinOpened: 1,
-				//MaxOpened:           numChannels * 100,
-				MaxOpened:           1,
+				MinOpened:           100,
+				//MinOpened: 1,
+				MaxOpened:           numChannels * 100,
+				//MaxOpened:           1,
 				MaxBurst:            10,
-				WriteSessions:       0.2,
+				//WriteSessions:       0.2,
+				WriteSessions:       1.0,
 				HealthCheckWorkers:  10,
 				HealthCheckInterval: healthCheckIntervalMins * time.Minute,
 			},
@@ -44,7 +45,7 @@ func ConcreteNewClient(ctx context.Context) *spanner.Client {
 	c, err := NewClient(ctx, SpannerProjectID, SpannerInstance, SpannerDB)
 	if err != nil {
 		fmt.Println("client create NG")
-		fmt.Errorf("%v", err)
+		fmt.Printf("%v", err)
 	}
 	fmt.Println("client create OK")
 	return c

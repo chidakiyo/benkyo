@@ -27,16 +27,16 @@ func Test_アカウント10件作成する(t *testing.T) {
 	_, err := con.ReadWriteTransaction(ctx, func(ctx context.Context, transaction *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: `INSERT User (ID, UserID, Email,  Password, CreatedAt, ModifiedAt) VALUES
-					('74514912-1b78-4afb-8119-034f8e241e2b', 'U1' ,'U1@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('b8dfe98a-db5c-4177-83b8-ea0326a12032', 'U2' ,'U2@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('d684b2a5-55ac-4d7b-80be-e5d9157a2b7d', 'U3' ,'U3@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('7647dd05-7e8d-407b-8582-d8dc06defe43', 'U4' ,'U4@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('e6f36cb0-4ece-4618-9dde-9440dd247acb', 'U5' ,'U5@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('2bc48d3a-f709-4cfc-b46f-6642ed5aa598', 'U6' ,'U6@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('8d00e09b-1ffe-4393-be5f-9cb2e46d81c1', 'U7' ,'U7@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('7b0d2492-b2b2-4176-9cf5-47364e192f1a', 'U8' ,'U8@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('992c5a0b-f93e-4362-8d44-9060a6c2115e', 'U9' ,'U9@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
-					('92f96ab5-400a-4211-aa93-5312096194b2', 'U10','U10@example.com','password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07')`,
+					('U_74514912-1b78-4afb-8119-034f8e241e2b', 'U1' ,'U1@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_b8dfe98a-db5c-4177-83b8-ea0326a12032', 'U2' ,'U2@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_d684b2a5-55ac-4d7b-80be-e5d9157a2b7d', 'U3' ,'U3@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_7647dd05-7e8d-407b-8582-d8dc06defe43', 'U4' ,'U4@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_e6f36cb0-4ece-4618-9dde-9440dd247acb', 'U5' ,'U5@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_2bc48d3a-f709-4cfc-b46f-6642ed5aa598', 'U6' ,'U6@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_8d00e09b-1ffe-4393-be5f-9cb2e46d81c1', 'U7' ,'U7@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_7b0d2492-b2b2-4176-9cf5-47364e192f1a', 'U8' ,'U8@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_992c5a0b-f93e-4362-8d44-9060a6c2115e', 'U9' ,'U9@example.com' ,'password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07'),
+					('U_92f96ab5-400a-4211-aa93-5312096194b2', 'U10','U10@example.com','password','2016-12-25 05:30:00+07', '2016-12-25 05:30:00+07')`,
 		}
 		rowCount, err := transaction.Update(ctx, stmt)
 		t.Logf("Rows %v", rowCount)
