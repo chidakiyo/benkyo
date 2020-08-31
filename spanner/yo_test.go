@@ -204,6 +204,7 @@ func Test_アカウントを大量に投入する(t *testing.T) {
 		start := time.Now()
 		u := models.User{
 			ID:         user_uuid_gen(),
+			//UserID:     fmt.Sprintf("U%s", strings.Split(uuid, "-")[4]),
 			UserID:     fmt.Sprintf("U%d", i),
 			Email:      fmt.Sprintf("U%d@example.com", i),
 			Password:   "password",
