@@ -7,10 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"cloud.google.com/go/spanner"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"cloud.google.com/go/spanner"
 )
+
 // YODB is the common interface for database operations.
 type YODB interface {
 	YORODB
@@ -25,7 +26,7 @@ type YORODB interface {
 }
 
 // YOLog provides the log func used by generated queries.
-var YOLog = func(context.Context, string, ...interface{}) { }
+var YOLog = func(context.Context, string, ...interface{}) {}
 
 func newError(method, table string, err error) error {
 	code := spanner.ErrCode(err)
@@ -72,6 +73,6 @@ func (e yoError) GRPCStatus() *status.Status {
 	return status.New(e.code, e.Error())
 }
 
-func (e yoError) Timeout() bool { return e.code == codes.DeadlineExceeded }
+func (e yoError) Timeout() bool   { return e.code == codes.DeadlineExceeded }
 func (e yoError) Temporary() bool { return e.code == codes.DeadlineExceeded }
-func (e yoError) NotFound() bool { return e.code == codes.NotFound }
+func (e yoError) NotFound() bool  { return e.code == codes.NotFound }

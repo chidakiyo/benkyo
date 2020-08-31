@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/spanner"
-	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
 )
 
@@ -193,75 +192,4 @@ func ReadUser(ctx context.Context, db YORODB, keys spanner.KeySet) ([]*User, err
 func (u *User) Delete(ctx context.Context) *spanner.Mutation {
 	values, _ := u.columnsToValues(UserPrimaryKeys())
 	return spanner.Delete("User", spanner.Key(values))
-}
-
-// FindUserByUserID retrieves a row from 'User' as a User.
-//
-// If no row is present with the given key, then ReadRow returns an error where
-// spanner.ErrCode(err) is codes.NotFound.
-//
-// Generated from unique index 'IDX_User_UserID_U_8011B398893A4B66'.
-func FindUserByUserID(ctx context.Context, db YORODB, userID string) (*User, error) {
-	const sqlstr = "SELECT " +
-		"ID, CreatedAt, Email, ModifiedAt, Password, UserID " +
-		"FROM User@{FORCE_INDEX=IDX_User_UserID_U_8011B398893A4B66} " +
-		"WHERE UserID = @param0"
-
-	stmt := spanner.NewStatement(sqlstr)
-	stmt.Params["param0"] = userID
-
-	decoder := newUser_Decoder(UserColumns())
-
-	// run query
-	YOLog(ctx, sqlstr, userID)
-	iter := db.Query(ctx, stmt)
-	defer iter.Stop()
-
-	row, err := iter.Next()
-	if err != nil {
-		if err == iterator.Done {
-			return nil, newErrorWithCode(codes.NotFound, "FindUserByUserID", "User", err)
-		}
-		return nil, newError("FindUserByUserID", "User", err)
-	}
-
-	u, err := decoder(row)
-	if err != nil {
-		return nil, newErrorWithCode(codes.Internal, "FindUserByUserID", "User", err)
-	}
-
-	return u, nil
-}
-
-// ReadUserByUserID retrieves multiples rows from 'User' by KeySet as a slice.
-//
-// This does not retrives all columns of 'User' because an index has only columns
-// used for primary key, index key and storing columns. If you need more columns, add storing
-// columns or Read by primary key or Query with join.
-//
-// Generated from unique index 'IDX_User_UserID_U_8011B398893A4B66'.
-func ReadUserByUserID(ctx context.Context, db YORODB, keys spanner.KeySet) ([]*User, error) {
-	var res []*User
-	columns := []string{
-		"ID",
-		"UserID",
-	}
-
-	decoder := newUser_Decoder(columns)
-
-	rows := db.ReadUsingIndex(ctx, "User", "IDX_User_UserID_U_8011B398893A4B66", keys, columns)
-	err := rows.Do(func(row *spanner.Row) error {
-		u, err := decoder(row)
-		if err != nil {
-			return err
-		}
-		res = append(res, u)
-
-		return nil
-	})
-	if err != nil {
-		return nil, newErrorWithCode(codes.Internal, "ReadUserByUserID", "User", err)
-	}
-
-	return res, nil
 }
