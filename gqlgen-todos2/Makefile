@@ -6,5 +6,9 @@ tools:
 gqlgen-init:
 	./_bin/gqlgen init
 
+gqlgen-basic:
+	./_bin/gqlgen generate
+
+# add resolver.go -> //go:generate go run github.com/99designs/gqlgen
 gqlgen:
-	./_bin/gqlgen -v generate
+	go generate ./...
