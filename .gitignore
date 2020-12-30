@@ -4,3 +4,4 @@ node_modules
 
 go.sum
 _bin
+.terraform

@@ -1,7 +1,7 @@
 
 
 tools:
-	@go build -mod=mod -o ./_bin/gqlgen		github.com/99designs/gqlgen
+	@go build -mod=mod -o ./_bin/gqlgen			github.com/99designs/gqlgen
 
 gqlgen-init:
 	./_bin/gqlgen init
@@ -28,3 +28,23 @@ deploy:
 	--set-env-vars GCP_PROJECT=${PROJECT_ID} \
 	--max-instances 1 \
 	--source .
+
+################################################
+
+tf-init:
+	terraform init ./tf/
+
+tf-plan:
+	terraform plan ./tf/
+
+tf-apply:
+	terraform apply ./tf/
+
+tf-workspace-list:
+	terraform workspace list
+
+tf-destroy:
+	terraform destroy
+
+
+
