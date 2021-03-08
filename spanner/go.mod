@@ -1,6 +1,6 @@
 module github.com/chidakiyo/benkyo/spanner
 
-go 1.14
+go 1.16
 
 require (
 	cloud.google.com/go/spanner v1.9.0
