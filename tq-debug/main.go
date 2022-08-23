@@ -20,7 +20,7 @@ var signalChan = make(chan os.Signal, 1)
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8081"
+		port = "8080"
 		log.Printf("defaulting to port %s", port)
 	}
 
@@ -55,13 +55,15 @@ func main() {
 	log.Print("server exited")
 }
 
+const path = "/tasks/exec"
+
 func put(c *gin.Context) {
 	projectID := os.Getenv("PROJECT_ID")
 	locationID := os.Getenv("LOCATION")
 	queue := os.Getenv("QUEUE")
 	url := os.Getenv("URL")
 
-	_, err := createHTTPTask(c.Request.Context(), projectID, locationID, queue, url+"/tasks/exec", "hello")
+	_, err := createHTTPTask(c.Request.Context(), projectID, locationID, queue, url+path, "hello")
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		c.String(http.StatusBadRequest, "")
