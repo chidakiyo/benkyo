@@ -27,7 +27,7 @@ func main() {
 	g := gin.Default()
 
 	g.GET("/add", put)
-	g.POST("/push", push)
+	g.POST("/tasks/exec", push)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
@@ -79,6 +79,9 @@ func push(c *gin.Context) {
 	}
 	b, _ := io.ReadAll(c.Request.Body)
 	fmt.Println("来たよ ", string(b))
+
+	fmt.Printf("%+v\n", c.Request.TransferEncoding)
+
 }
 
 func createHTTPTask(ctx context.Context, projectID, locationID, queueID, url, message string) (*taskspb.Task, error) {
