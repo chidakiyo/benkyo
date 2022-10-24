@@ -2,10 +2,14 @@ module github.com/chidakiyo/benkyo/go-db-ent-atlas
 
 go 1.19
 
-require entgo.io/ent v0.11.3
+require (
+	ariga.io/atlas v0.7.2-0.20220927111110-867ee0cca56a
+	entgo.io/ent v0.11.3
+	github.com/mattn/go-sqlite3 v1.14.15
+	github.com/smith-30/goparco/ent_playground v0.0.0-20220321090706-a2cbfab2b075
+)
 
 require (
-	ariga.io/atlas v0.7.2-0.20220927111110-867ee0cca56a // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
