@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/car"
-	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/group"
-	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/user"
+	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/foo"
+	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/hoge"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -33,9 +33,9 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		car.Table:   car.ValidColumn,
-		group.Table: group.ValidColumn,
-		user.Table:  user.ValidColumn,
+		car.Table:  car.ValidColumn,
+		foo.Table:  foo.ValidColumn,
+		hoge.Table: hoge.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

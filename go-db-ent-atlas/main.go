@@ -2,16 +2,17 @@ package main
 
 import (
 	"context"
+	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent"
 	"log"
 
 	"ariga.io/atlas/sql/migrate"
 	"entgo.io/ent/dialect/sql/schema"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/smith-30/goparco/ent_playground/ent"
 )
 
 func main() {
 	diff()
+	//migration()
 }
 
 func diff() {
@@ -35,6 +36,7 @@ func diff() {
 	if err != nil {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
+	log.Println("complete.")
 }
 
 func migration() {

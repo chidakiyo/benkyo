@@ -20,7 +20,6 @@ type Car struct {
 	Model string `json:"model,omitempty"`
 	// RegisteredAt holds the value of the "registered_at" field.
 	RegisteredAt time.Time `json:"registered_at,omitempty"`
-	user_cars    *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -34,8 +33,6 @@ func (*Car) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case car.FieldRegisteredAt:
 			values[i] = new(sql.NullTime)
-		case car.ForeignKeys[0]: // user_cars
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Car", columns[i])
 		}
@@ -68,13 +65,6 @@ func (c *Car) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field registered_at", values[i])
 			} else if value.Valid {
 				c.RegisteredAt = value.Time
-			}
-		case car.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_cars", value)
-			} else if value.Valid {
-				c.user_cars = new(int)
-				*c.user_cars = int(value.Int64)
 			}
 		}
 	}

@@ -11,12 +11,11 @@ import (
 	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/migrate"
 
 	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/car"
-	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/group"
-	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/user"
+	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/foo"
+	"github.com/chidakiyo/benkyo/go-db-ent-atlas/ent/hoge"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -26,10 +25,10 @@ type Client struct {
 	Schema *migrate.Schema
 	// Car is the client for interacting with the Car builders.
 	Car *CarClient
-	// Group is the client for interacting with the Group builders.
-	Group *GroupClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// Foo is the client for interacting with the Foo builders.
+	Foo *FooClient
+	// Hoge is the client for interacting with the Hoge builders.
+	Hoge *HogeClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -44,8 +43,8 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Car = NewCarClient(c.config)
-	c.Group = NewGroupClient(c.config)
-	c.User = NewUserClient(c.config)
+	c.Foo = NewFooClient(c.config)
+	c.Hoge = NewHogeClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -80,8 +79,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:    ctx,
 		config: cfg,
 		Car:    NewCarClient(cfg),
-		Group:  NewGroupClient(cfg),
-		User:   NewUserClient(cfg),
+		Foo:    NewFooClient(cfg),
+		Hoge:   NewHogeClient(cfg),
 	}, nil
 }
 
@@ -102,8 +101,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:    ctx,
 		config: cfg,
 		Car:    NewCarClient(cfg),
-		Group:  NewGroupClient(cfg),
-		User:   NewUserClient(cfg),
+		Foo:    NewFooClient(cfg),
+		Hoge:   NewHogeClient(cfg),
 	}, nil
 }
 
@@ -133,8 +132,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Car.Use(hooks...)
-	c.Group.Use(hooks...)
-	c.User.Use(hooks...)
+	c.Foo.Use(hooks...)
+	c.Hoge.Use(hooks...)
 }
 
 // CarClient is a client for the Car schema.
@@ -227,84 +226,84 @@ func (c *CarClient) Hooks() []Hook {
 	return c.hooks.Car
 }
 
-// GroupClient is a client for the Group schema.
-type GroupClient struct {
+// FooClient is a client for the Foo schema.
+type FooClient struct {
 	config
 }
 
-// NewGroupClient returns a client for the Group from the given config.
-func NewGroupClient(c config) *GroupClient {
-	return &GroupClient{config: c}
+// NewFooClient returns a client for the Foo from the given config.
+func NewFooClient(c config) *FooClient {
+	return &FooClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `group.Hooks(f(g(h())))`.
-func (c *GroupClient) Use(hooks ...Hook) {
-	c.hooks.Group = append(c.hooks.Group, hooks...)
+// A call to `Use(f, g, h)` equals to `foo.Hooks(f(g(h())))`.
+func (c *FooClient) Use(hooks ...Hook) {
+	c.hooks.Foo = append(c.hooks.Foo, hooks...)
 }
 
-// Create returns a builder for creating a Group entity.
-func (c *GroupClient) Create() *GroupCreate {
-	mutation := newGroupMutation(c.config, OpCreate)
-	return &GroupCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Foo entity.
+func (c *FooClient) Create() *FooCreate {
+	mutation := newFooMutation(c.config, OpCreate)
+	return &FooCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Group entities.
-func (c *GroupClient) CreateBulk(builders ...*GroupCreate) *GroupCreateBulk {
-	return &GroupCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Foo entities.
+func (c *FooClient) CreateBulk(builders ...*FooCreate) *FooCreateBulk {
+	return &FooCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Group.
-func (c *GroupClient) Update() *GroupUpdate {
-	mutation := newGroupMutation(c.config, OpUpdate)
-	return &GroupUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Foo.
+func (c *FooClient) Update() *FooUpdate {
+	mutation := newFooMutation(c.config, OpUpdate)
+	return &FooUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *GroupClient) UpdateOne(gr *Group) *GroupUpdateOne {
-	mutation := newGroupMutation(c.config, OpUpdateOne, withGroup(gr))
-	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *FooClient) UpdateOne(f *Foo) *FooUpdateOne {
+	mutation := newFooMutation(c.config, OpUpdateOne, withFoo(f))
+	return &FooUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *GroupClient) UpdateOneID(id int) *GroupUpdateOne {
-	mutation := newGroupMutation(c.config, OpUpdateOne, withGroupID(id))
-	return &GroupUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *FooClient) UpdateOneID(id int) *FooUpdateOne {
+	mutation := newFooMutation(c.config, OpUpdateOne, withFooID(id))
+	return &FooUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Group.
-func (c *GroupClient) Delete() *GroupDelete {
-	mutation := newGroupMutation(c.config, OpDelete)
-	return &GroupDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Foo.
+func (c *FooClient) Delete() *FooDelete {
+	mutation := newFooMutation(c.config, OpDelete)
+	return &FooDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *GroupClient) DeleteOne(gr *Group) *GroupDeleteOne {
-	return c.DeleteOneID(gr.ID)
+func (c *FooClient) DeleteOne(f *Foo) *FooDeleteOne {
+	return c.DeleteOneID(f.ID)
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *GroupClient) DeleteOneID(id int) *GroupDeleteOne {
-	builder := c.Delete().Where(group.ID(id))
+func (c *FooClient) DeleteOneID(id int) *FooDeleteOne {
+	builder := c.Delete().Where(foo.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &GroupDeleteOne{builder}
+	return &FooDeleteOne{builder}
 }
 
-// Query returns a query builder for Group.
-func (c *GroupClient) Query() *GroupQuery {
-	return &GroupQuery{
+// Query returns a query builder for Foo.
+func (c *FooClient) Query() *FooQuery {
+	return &FooQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a Group entity by its id.
-func (c *GroupClient) Get(ctx context.Context, id int) (*Group, error) {
-	return c.Query().Where(group.ID(id)).Only(ctx)
+// Get returns a Foo entity by its id.
+func (c *FooClient) Get(ctx context.Context, id int) (*Foo, error) {
+	return c.Query().Where(foo.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
+func (c *FooClient) GetX(ctx context.Context, id int) *Foo {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -313,88 +312,88 @@ func (c *GroupClient) GetX(ctx context.Context, id int) *Group {
 }
 
 // Hooks returns the client hooks.
-func (c *GroupClient) Hooks() []Hook {
-	return c.hooks.Group
+func (c *FooClient) Hooks() []Hook {
+	return c.hooks.Foo
 }
 
-// UserClient is a client for the User schema.
-type UserClient struct {
+// HogeClient is a client for the Hoge schema.
+type HogeClient struct {
 	config
 }
 
-// NewUserClient returns a client for the User from the given config.
-func NewUserClient(c config) *UserClient {
-	return &UserClient{config: c}
+// NewHogeClient returns a client for the Hoge from the given config.
+func NewHogeClient(c config) *HogeClient {
+	return &HogeClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
-func (c *UserClient) Use(hooks ...Hook) {
-	c.hooks.User = append(c.hooks.User, hooks...)
+// A call to `Use(f, g, h)` equals to `hoge.Hooks(f(g(h())))`.
+func (c *HogeClient) Use(hooks ...Hook) {
+	c.hooks.Hoge = append(c.hooks.Hoge, hooks...)
 }
 
-// Create returns a builder for creating a User entity.
-func (c *UserClient) Create() *UserCreate {
-	mutation := newUserMutation(c.config, OpCreate)
-	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a builder for creating a Hoge entity.
+func (c *HogeClient) Create() *HogeCreate {
+	mutation := newHogeMutation(c.config, OpCreate)
+	return &HogeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of User entities.
-func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
-	return &UserCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Hoge entities.
+func (c *HogeClient) CreateBulk(builders ...*HogeCreate) *HogeCreateBulk {
+	return &HogeCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for User.
-func (c *UserClient) Update() *UserUpdate {
-	mutation := newUserMutation(c.config, OpUpdate)
-	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Hoge.
+func (c *HogeClient) Update() *HogeUpdate {
+	mutation := newHogeMutation(c.config, OpUpdate)
+	return &HogeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *HogeClient) UpdateOne(h *Hoge) *HogeUpdateOne {
+	mutation := newHogeMutation(c.config, OpUpdateOne, withHoge(h))
+	return &HogeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *HogeClient) UpdateOneID(id string) *HogeUpdateOne {
+	mutation := newHogeMutation(c.config, OpUpdateOne, withHogeID(id))
+	return &HogeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for User.
-func (c *UserClient) Delete() *UserDelete {
-	mutation := newUserMutation(c.config, OpDelete)
-	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Hoge.
+func (c *HogeClient) Delete() *HogeDelete {
+	mutation := newHogeMutation(c.config, OpDelete)
+	return &HogeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
-	return c.DeleteOneID(u.ID)
+func (c *HogeClient) DeleteOne(h *Hoge) *HogeDeleteOne {
+	return c.DeleteOneID(h.ID)
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
-	builder := c.Delete().Where(user.ID(id))
+func (c *HogeClient) DeleteOneID(id string) *HogeDeleteOne {
+	builder := c.Delete().Where(hoge.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &UserDeleteOne{builder}
+	return &HogeDeleteOne{builder}
 }
 
-// Query returns a query builder for User.
-func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{
+// Query returns a query builder for Hoge.
+func (c *HogeClient) Query() *HogeQuery {
+	return &HogeQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
-	return c.Query().Where(user.ID(id)).Only(ctx)
+// Get returns a Hoge entity by its id.
+func (c *HogeClient) Get(ctx context.Context, id string) (*Hoge, error) {
+	return c.Query().Where(hoge.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id int) *User {
+func (c *HogeClient) GetX(ctx context.Context, id string) *Hoge {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -402,23 +401,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	return obj
 }
 
-// QueryCars queries the cars edge of a User.
-func (c *UserClient) QueryCars(u *User) *CarQuery {
-	query := &CarQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(car.Table, car.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.CarsTable, user.CarsColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
-func (c *UserClient) Hooks() []Hook {
-	return c.hooks.User
+func (c *HogeClient) Hooks() []Hook {
+	return c.hooks.Hoge
 }
